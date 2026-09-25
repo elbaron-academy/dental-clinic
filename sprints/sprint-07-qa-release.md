@@ -1,6 +1,6 @@
 # Sprint 07 — QA and Release Gate
 
-Status: BACKLOG
+Status: DONE (release gate passed)
 
 ## QA scope
 - Automated tests first.
@@ -24,3 +24,16 @@ Flutter runtime testing is disabled for the current MVP.
 
 ## Exit criteria
 All approved acceptance criteria pass and no blocking defects remain.
+
+## Delivery
+| Artifact | Where |
+|---|---|
+| API acceptance suite | `qa/api/` (37 tests, SQLite + PostgreSQL) |
+| Web + PWA end-to-end suite | `qa/e2e/` (36 tests: desktop Chromium + mobile Chromium) |
+| QA report | [`qa/reports/QA_REPORT.md`](../qa/reports/QA_REPORT.md) |
+
+## Gate log
+| Step | Result | Notes |
+|---|---|---|
+| QA regression | QA_PASSED | Backend 211 · API acceptance 37 · Web unit 36 · E2E 36, all passing. |
+| Team Leader release gate | APPROVED | No blocking defects. All approved acceptance criteria pass. Flutter runtime testing stays disabled. Open product question: CR-009. |

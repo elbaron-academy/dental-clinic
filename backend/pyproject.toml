@@ -19,3 +19,6 @@ DJANGO_SETTINGS_MODULE = "config.test_settings"
 python_files = ["test_*.py"]
 addopts = "-q --strict-markers"
 filterwarnings = ["error::RuntimeWarning"]
+
+[tool.coverage.run]
+omit = ["*/tests/*", "*/migrations/*", "config/asgi.py", "config/wsgi.py", "manage.py"]

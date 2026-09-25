@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { setAuthToken, setUnauthorizedHandler } from '../api/client'
 import * as api from '../api/endpoints'
 import type { Me, Role } from '../api/types'
@@ -28,8 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Me | null>(null)
   const [status, setStatus] = useState<AuthStatus>(() => (readToken() ? 'loading' : 'anonymous'))
   const [sessionExpired, setSessionExpired] = useState(false)
+  const [lastRole, setLastRole] = useState<Role | null>(null)
+  const userRef = useRef<Me | null>(null)
+  useEffect(() => {
+    userRef.current = user
+  }, [user])
 
   const clear = useCallback(() => {
+    if (userRef.current) setLastRole(userRef.current.role)
     writeToken(null)
     setUser(null)
     setStatus('anonymous')
@@ -88,8 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const value = useMemo(
-    () => ({ status, user, login, logout, hasPerm, sessionExpired }),
-    [status, user, login, logout, hasPerm, sessionExpired],
+    () => ({ status, user, login, logout, hasPerm, sessionExpired, lastRole }),
+    [status, user, login, logout, hasPerm, sessionExpired, lastRole],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -14,13 +14,13 @@ BACKLOG -> IN_PROGRESS -> READY_FOR_REVIEW -> CHANGES_REQUESTED/APPROVED -> READ
 
 | Sprint | Scope | Status |
 |---|---|---|
-| [01](sprint-01-foundation.md) | Foundation | BACKLOG |
-| [02](sprint-02-authentication.md) | Authentication, roles, clinic setup | BACKLOG |
-| [03](sprint-03-patients.md) | Patient registration | BACKLOG |
-| [04](sprint-04-appointments.md) | Appointments, check-in, queue | BACKLOG |
-| [05](sprint-05-visits.md) | Doctor visit, clinical catalog | BACKLOG |
-| [06](sprint-06-payments.md) | Payments | BACKLOG |
-| [07](sprint-07-qa-release.md) | QA and release gate | BACKLOG |
+| [01](sprint-01-foundation.md) | Foundation | DONE |
+| [02](sprint-02-authentication.md) | Authentication, roles, clinic setup | DONE (QA_PASSED) |
+| [03](sprint-03-patients.md) | Patient registration | DONE (QA_PASSED) |
+| [04](sprint-04-appointments.md) | Appointments, check-in, queue | DONE (QA_PASSED) |
+| [05](sprint-05-visits.md) | Doctor visit, clinical catalog | DONE (QA_PASSED) |
+| [06](sprint-06-payments.md) | Payments | DONE (QA_PASSED) |
+| [07](sprint-07-qa-release.md) | QA and release gate | DONE |
 
 Requirement IDs and verification: [TRACEABILITY.md](TRACEABILITY.md).
 Gaps and approved defaults: [../docs/DECISIONS.md](../docs/DECISIONS.md).

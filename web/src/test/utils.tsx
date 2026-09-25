@@ -37,6 +37,7 @@ export function authValue(user: Me | null, overrides: Partial<AuthContextValue> 
     logout: vi.fn(),
     hasPerm: (...perms: string[]) => !!user && perms.every((p) => user.permissions.includes(p)),
     sessionExpired: false,
+    lastRole: null,
     ...overrides,
   }
 }
@@ -52,6 +53,7 @@ export function renderWithAuth(
         <Routes>
           <Route path={route} element={element} />
           <Route path="/login" element={<p>Login chooser</p>} />
+          <Route path="/login/reception" element={<p>Reception login</p>} />
           <Route path="/doctor" element={<p>Doctor home</p>} />
           <Route path="/assistant" element={<p>Assistant home</p>} />
           <Route path="/reception" element={<p>Reception home</p>} />

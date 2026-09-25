@@ -1,5 +1,6 @@
+from django.http import Http404
 from rest_framework import status
-from rest_framework.exceptions import APIException, ErrorDetail
+from rest_framework.exceptions import APIException, ErrorDetail, NotFound
 from rest_framework.views import exception_handler
 
 
@@ -20,6 +21,8 @@ def api_exception_handler(exc, context):
     ``{"detail": "...", "code": "active_visit_exists"}`` lets clients react to
     specific failures without parsing human-readable text.
     """
+    if isinstance(exc, Http404):
+        exc = NotFound()  # Do not reveal model names ("No Patient matches ...").
     response = exception_handler(exc, context)
     if response is None or not isinstance(response.data, dict):
         return response

@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth, useUser } from '../auth/context'
 import { ROLES } from '../auth/roles'
 import { InstallButton } from './InstallButton'
@@ -19,7 +19,6 @@ export function Logo() {
 export function Layout() {
   const user = useUser()
   const { hasPerm, logout } = useAuth()
-  const navigate = useNavigate()
   const role = ROLES[user.role]
 
   const links = [
@@ -52,14 +51,7 @@ export function Layout() {
             <span className="user-name">
               {user.full_name} <span className="badge badge-role">{user.role_display}</span>
             </span>
-            <button
-              type="button"
-              className="btn btn-ghost btn-small"
-              onClick={async () => {
-                await logout()
-                navigate(role.login, { replace: true })
-              }}
-            >
+            <button type="button" className="btn btn-ghost btn-small" onClick={() => void logout()}>
               Log out
             </button>
           </div>

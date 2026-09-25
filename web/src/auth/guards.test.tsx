@@ -43,3 +43,15 @@ describe('route guards (AUTH-002)', () => {
     expect(screen.queryByText('Register form')).not.toBeInTheDocument()
   })
 })
+
+describe('logout routing', () => {
+  it('sends a signed-out user back to their own role login page', () => {
+    renderWithAuth(
+      <RequireAuth>
+        <p>Secret</p>
+      </RequireAuth>,
+      { user: null, path: '/patients', route: '/patients', auth: { lastRole: 'RECEPTIONIST' } },
+    )
+    expect(screen.getByText('Reception login')).toBeInTheDocument()
+  })
+})

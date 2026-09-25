@@ -1,6 +1,6 @@
 # Sprint 03 — Patient Registration
 
-Status: BACKLOG
+Status: DONE (QA_PASSED)
 
 ## Requirements
 - PATIENT-001: Patient name + phone.
@@ -22,3 +22,19 @@ Implement registration, listing, permissions, and tests across approved clients.
 | S03-PWA-01 Patient list + search, registration form (minor toggle), detail, edit | PWA | PATIENT-001..005 |
 | S03-FL-01 Patient list, registration and detail screens — code only | Flutter | PATIENT-001..005 |
 | S03-QA-01 API acceptance + Web registration tests | QA | all |
+
+## Delivery
+| Layer | Where |
+|---|---|
+| Backend | `apps/patients` (model with DB constraint for minors, serializer rules, scoped viewset, admin), `apps/core/scoping.py` |
+| PWA | `web/src/pages/patients/*` (list/search, register/edit with minor toggle, detail) |
+| Flutter | `mobile/lib/src/screens/patients/*` (code only) |
+| Tests | `backend/apps/patients/tests/*`, `qa/api/test_patients.py`, `qa/e2e/reception.spec.ts`, `web/src/pages/patients/PatientForm.test.tsx` |
+
+## Gate log
+| Step | Result | Notes |
+|---|---|---|
+| Backend → Team Leader | APPROVED | Scoping uses an `EXISTS` subquery, so pagination has no duplicates. `doctor_ids` only ever adds doctors. |
+| PWA/Web → Team Leader | APPROVED | Client checks mirror PATIENT-001/003, and API field errors are shown inline. |
+| Flutter → Team Leader | APPROVED (code review) | |
+| QA | QA_PASSED | |

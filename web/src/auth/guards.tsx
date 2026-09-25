@@ -14,10 +14,14 @@ function FullPageSpinner() {
 
 /** Requires a signed-in user; otherwise sends them to the login chooser. */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { status } = useAuth()
+  const { status, lastRole } = useAuth()
   const location = useLocation()
   if (status === 'loading') return <FullPageSpinner />
-  if (status === 'anonymous') return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  if (status === 'anonymous') {
+    // After logout or an expired session, go back to the user's own login page.
+    const target = lastRole ? ROLES[lastRole].login : '/login'
+    return <Navigate to={target} replace state={lastRole ? undefined : { from: location.pathname }} />
+  }
   return <>{children}</>
 }
 

@@ -181,6 +181,9 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", default=True)
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
+    # Usually handled by the reverse proxy; enable here when Django terminates HTTPS itself.
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SSL_REDIRECT", default=False)
+    SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
 
 LOGGING = {
     "version": 1,

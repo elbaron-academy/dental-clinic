@@ -81,7 +81,7 @@ function AmountDueForm({ appointment, onSaved }: { appointment: Appointment; onS
 
   const fieldError = error instanceof ApiError ? error.field('amount_due') : undefined
   return (
-    <form className="inline-form" onSubmit={onSubmit} aria-label="Amount due">
+    <form className="inline-form" onSubmit={onSubmit}>
       <Field label="Amount due" htmlFor="amount_due" error={fieldError}>
         <input
           id="amount_due"
@@ -129,7 +129,7 @@ function PaymentForm({ appointment, remaining, onSaved }: { appointment: Appoint
 
   const apiError = error instanceof ApiError ? error : null
   return (
-    <form className="inline-form" onSubmit={onSubmit} aria-label="Record payment">
+    <form className="inline-form" onSubmit={onSubmit}>
       <Field label="Payment amount" htmlFor="payment_amount" error={apiError?.field('amount')}>
         <input
           id="payment_amount"

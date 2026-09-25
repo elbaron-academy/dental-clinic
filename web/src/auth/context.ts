@@ -11,6 +11,8 @@ export interface AuthContextValue {
   hasPerm: (...perms: string[]) => boolean
   /** Signed out because the session expired or was revoked elsewhere. */
   sessionExpired: boolean
+  /** Role of the user who last signed out, to send them back to their own login page. */
+  lastRole: Role | null
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

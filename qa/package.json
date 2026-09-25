@@ -1,0 +1,17 @@
+{
+  "name": "dental-clinic-qa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "api": "../backend/.venv/bin/pytest",
+    "e2e": "playwright test",
+    "report": "playwright show-report",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "^24.13.3",
+    "typescript": "~6.0.2"
+  }
+}

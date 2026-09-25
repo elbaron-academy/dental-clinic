@@ -1,6 +1,6 @@
 # Sprint 05 — Doctor Visit
 
-Status: BACKLOG
+Status: DONE (QA_PASSED)
 
 ## Requirements
 - VISIT-001: Visit notes.
@@ -25,3 +25,19 @@ Status: BACKLOG
 | S05-PWA-02 Patient visit history | PWA | VISIT-008, LIFE-002, LIFE-003 |
 | S05-FL-01 Equivalent Flutter screens — code only | Flutter | all |
 | S05-QA-01 API acceptance + Web visit tests | QA | all |
+
+## Delivery
+| Layer | Where |
+|---|---|
+| Backend | `apps/catalog` (Procedure, Medication, admin, read API), `apps/visits` (models, FDI tooth validator, services, viewset actions, admin) |
+| PWA | `web/src/pages/visits/VisitPage.tsx`, `components/VisitDetails.tsx`, visit history in `pages/patients/PatientDetail.tsx` |
+| Flutter | `mobile/lib/src/screens/visits/visit_screen.dart`, `widgets/visit_details.dart` (code only) |
+| Tests | `backend/apps/visits/tests/*`, `backend/apps/catalog/tests/*`, `qa/api/test_lifecycle.py`, `qa/e2e/doctor.spec.ts`, `web/src/pages/visits/VisitPage.test.tsx` |
+
+## Gate log
+| Step | Result | Notes |
+|---|---|---|
+| Backend → Team Leader | APPROVED | Only the owning doctor records a visit (403 otherwise). A completed visit is read-only (409 `visit_completed`). A visit cannot be completed without an outcome (CR-010). |
+| PWA/Web → Team Leader | APPROVED | Unsaved notes are saved automatically before completing the visit. |
+| Flutter → Team Leader | APPROVED (code review) | |
+| QA | QA_FAILED → QA_PASSED | DEF-002: 404 responses exposed internal model names. The backend now returns a generic "Not found." Re-tested. |

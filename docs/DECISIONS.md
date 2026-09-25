@@ -5,7 +5,7 @@ been modified. Where it is silent, the BA raised a change request (CR). The
 Team Leader approved each one as a conservative *implementation default* so
 the MVP could be delivered. Every CR still needs **product-owner
 confirmation**. If the product owner decides differently, the change stays
-small and local. The "Where" column shows the code to change.
+small and local. The "Where" column shows the code to change (paths are under `backend/`).
 
 Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
 `OPEN` (not implemented, needs a decision).
@@ -27,7 +27,7 @@ Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
 | CR-013 | Follow-up visits | Mechanism not defined | While the visit is active, the owning doctor records a follow-up. This creates a *Scheduled* appointment with the same doctor, linked to the originating visit. Reception can also book ordinary appointments at any time. | `apps/visits/views.py` | TL-APPROVED DEFAULT |
 | CR-014 | What a payment belongs to | Payment can happen "before or after a visit/session" | Amount due and payments are recorded per **appointment**, which exists both before and after the session. The patient balance adds up all non-cancelled appointments. | `apps/payments/` | TL-APPROVED DEFAULT |
 | CR-015 | Payment rules | Not defined | Amount due must be set before payments are recorded. Every payment is > 0. Overpayment is not allowed. Amount due cannot drop below the amount already paid. There are no refunds or voids in the MVP; corrections go through Django Admin. | `apps/payments/services.py` | TL-APPROVED DEFAULT |
-| CR-016 | Payment status | Lifecycle says "Payment Pending or Paid" | `NOT_SET` (no amount due yet), `PENDING` (remaining > 0), `PAID` (remaining = 0). | `apps/appointments/models.py` | TL-APPROVED DEFAULT |
+| CR-016 | Payment status | Lifecycle says "Payment Pending or Paid" | `NOT_SET` (no amount due yet), `PENDING` (remaining > 0), `PAID` (remaining = 0). | `apps/payments/billing.py` | TL-APPROVED DEFAULT |
 | CR-017 | Receptionist access to clinical content | Receptionist duties are non-clinical | By default a receptionist sees queue status but not diagnosis, treatment or medications. An admin can grant `visits.view_visit`. | `apps/accounts/roles.py` | TL-APPROVED DEFAULT |
 | CR-018 | Catalog scope | Not defined | Procedures and medications are either global (no clinic) or specific to one clinic. | `apps/catalog/models.py` | TL-APPROVED DEFAULT |
 | CR-019 | API session model | Not defined | DRF token authentication. The token lasts until logout. Login is rate-limited (default 10/min per client). | `config/settings.py` | TL-APPROVED DEFAULT |

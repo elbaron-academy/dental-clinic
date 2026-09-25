@@ -1,6 +1,6 @@
 # Sprint 02 — Authentication and Roles
 
-Status: BACKLOG
+Status: DONE (QA_PASSED)
 
 ## Requirements
 - AUTH-001: Login by phone number + password.
@@ -19,7 +19,7 @@ Backend:
 - S02-BE-03 Login / logout / me API with optional expected-role check and login throttling (AUTH-001, CR-003, CR-019).
 - S02-BE-04 Role groups + default permission matrix seeded on migrate (AUTH-002, ROLE-001..003, CR-002).
 - S02-BE-05 Clinic + permitted-doctor scoping helpers and `GET /api/doctors/` (ROLE-004).
-- S02-BE-06 `setup_clinic` and `seed_demo` management commands (CLINIC-001).
+- S02-BE-06 `seed_demo` (demo clinics) and `sync_role_permissions` commands; real clinics are set up in Django Admin (CLINIC-001).
 - S02-BE-07 Automated tests.
 
 PWA/Web:
@@ -35,3 +35,19 @@ Flutter:
 QA:
 - S02-QA-01 Automated authentication tests.
 - S02-QA-02 Web/PWA login and role-flow testing.
+
+## Delivery
+| Layer | Where |
+|---|---|
+| Backend | `apps/clinics`, `apps/accounts` (User by phone, roles, `roles.py`, `backends.py`, login/logout/me/doctors API, admin), `seed_demo`, `sync_role_permissions` |
+| PWA | `web/src/pages/LoginChooser.tsx`, `LoginPage.tsx` (`/login/doctor`, `/login/assistant`, `/login/reception`), `web/src/auth/*`, `components/Layout.tsx` |
+| Flutter | `mobile/lib/src/screens/login/*`, `mobile/lib/src/auth/*`, `mobile/lib/src/app.dart` (code only) |
+| Tests | `backend/apps/accounts/tests/*`, `qa/api/test_auth.py`, `qa/api/test_permissions.py`, `qa/e2e/auth.spec.ts`, `web/src/pages/LoginPage.test.tsx`, `web/src/auth/guards.test.tsx` |
+
+## Gate log
+| Step | Result | Notes |
+|---|---|---|
+| Backend → Team Leader | APPROVED | Phone is the only identifier; no username field or alternative password flow. Undeclared API actions are denied by default. Login is throttled. |
+| PWA/Web → Team Leader | APPROVED | Three role login pages, role homes, pages guarded by permission. |
+| Flutter → Team Leader | APPROVED (code review) | Not executed, per skills/flutter. |
+| QA | QA_FAILED → QA_PASSED | DEF-001: after logout the user could land on the portal chooser instead of their own login page. Fixed in the PWA and re-tested. |
