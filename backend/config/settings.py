@@ -92,9 +92,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database: SQLite for local development, PostgreSQL in production.
 # Example: DATABASE_URL=postgres://dental:secret@localhost:5432/dental_clinic
+# An empty DATABASE_URL counts as unset.
+DATABASE_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    "default": dj_database_url.parse(
+        DATABASE_URL,
         conn_max_age=int(os.environ.get("DATABASE_CONN_MAX_AGE", "60")),
         conn_health_checks=True,
     )

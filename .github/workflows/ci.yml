@@ -99,7 +99,7 @@ jobs:
           backend/.venv/bin/pip install -r backend/requirements-dev.txt
           npm ci --prefix web
           npm ci --prefix qa
-          npx --prefix qa playwright install --with-deps chromium
+          cd qa && npx playwright install --with-deps chromium
       - name: API acceptance tests
         working-directory: qa
         run: ../backend/.venv/bin/pytest
