@@ -164,6 +164,9 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
         "RoleEnum": "apps.accounts.models.Role",
+        "AppointmentStatusEnum": "apps.appointments.models.AppointmentStatus",
+        "VisitStatusEnum": "apps.visits.models.VisitStatus",
+        "PaymentStatusEnum": "apps.payments.models.PaymentStatus",
     },
 }
 

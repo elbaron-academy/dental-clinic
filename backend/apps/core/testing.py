@@ -62,3 +62,36 @@ def client_for(user: User | None = None) -> APIClient:
         token, _ = Token.objects.get_or_create(user=user)
         client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
     return client
+
+
+def make_patient(clinic: Clinic, doctors, *, full_name: str = "Test Patient", **kwargs):
+    from apps.patients.models import Patient
+
+    patient = Patient.objects.create(
+        clinic=clinic, full_name=full_name, phone=kwargs.pop("phone", next_phone()), **kwargs
+    )
+    patient.doctors.set(doctors)
+    return patient
+
+
+def make_appointment(patient, doctor, *, when=None, **kwargs):
+    from django.utils import timezone
+
+    from apps.appointments.models import Appointment
+
+    return Appointment.objects.create(
+        clinic=patient.clinic,
+        patient=patient,
+        doctor=doctor,
+        scheduled_at=when or timezone.now(),
+        **kwargs,
+    )
+
+
+def make_active_visit(patient, doctor, *, started_by=None):
+    """A checked-in appointment moved into an active visit."""
+    from apps.appointments.models import AppointmentStatus
+    from apps.visits.services import start_visit
+
+    appointment = make_appointment(patient, doctor, status=AppointmentStatus.CHECKED_IN)
+    return start_visit(appointment, started_by or doctor)

@@ -1,0 +1,2126 @@
+openapi: 3.0.3
+info:
+  title: Dental Clinic API
+  version: 1.0.0
+  description: 'API contract for the Dental Clinic MVP. Authenticate with `POST /api/auth/login/`
+    and send `Authorization: Token <token>`.'
+paths:
+  /api/appointments/:
+    get:
+      operationId: appointments_list
+      description: Appointments, check-in, queue and visit start (APPT-001..006).
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: YYYY-MM-DD in the server time zone.
+      - in: query
+        name: doctor
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: integer
+      - in: query
+        name: scheduled_from
+        schema:
+          type: string
+        description: ISO date-time, inclusive.
+      - in: query
+        name: scheduled_to
+        schema:
+          type: string
+        description: ISO date-time, exclusive.
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Patient name or phone.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Comma-separated statuses.
+      tags:
+      - appointments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAppointmentList'
+          description: ''
+    post:
+      operationId: appointments_create
+      description: Appointments, check-in, queue and visit start (APPT-001..006).
+      tags:
+      - appointments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+  /api/appointments/{id}/:
+    get:
+      operationId: appointments_retrieve
+      description: Appointments, check-in, queue and visit start (APPT-001..006).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+    put:
+      operationId: appointments_update
+      description: Appointments, check-in, queue and visit start (APPT-001..006).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+    patch:
+      operationId: appointments_partial_update
+      description: Appointments, check-in, queue and visit start (APPT-001..006).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAppointmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAppointmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAppointmentRequest'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+  /api/appointments/{id}/amount-due/:
+    post:
+      operationId: appointments_amount_due_create
+      description: Record the amount due; allowed before or after the session (PAY-001,
+        PAY-004).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AmountDueRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AmountDueRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AmountDueRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+  /api/appointments/{id}/cancel/:
+    post:
+      operationId: appointments_cancel_create
+      description: Appointments, check-in, queue and visit start (APPT-001..006).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+  /api/appointments/{id}/check-in/:
+    post:
+      operationId: appointments_check_in_create
+      description: Mark the patient as arrived; they now wait for the doctor (APPT-002).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+  /api/appointments/{id}/start-visit/:
+    post:
+      operationId: appointments_start_visit_create
+      description: Start the active visit. Fails with 409 if the patient is already
+        in one (APPT-005).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this appointment.
+        required: true
+      tags:
+      - appointments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: ''
+  /api/appointments/queue/:
+    get:
+      operationId: appointments_queue_retrieve
+      description: Patients waiting for each doctor and the visits in progress (APPT-003).
+      parameters:
+      - in: query
+        name: doctor
+        schema:
+          type: integer
+        description: Limit to one doctor.
+      tags:
+      - appointments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Phone number + password login for every role (AUTH-001).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: Revokes the token used for the request.
+      tags:
+      - auth
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      description: The signed-in user, their clinic, permissions and permitted doctors
+        (AUTH-002).
+      tags:
+      - auth
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/catalog/medications/:
+    get:
+      operationId: catalog_medications_list
+      description: Active medications available to the user's clinic.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - catalog
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Medication'
+          description: ''
+  /api/catalog/medications/{id}/:
+    get:
+      operationId: catalog_medications_retrieve
+      description: Active medications available to the user's clinic.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medication.
+        required: true
+      tags:
+      - catalog
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medication'
+          description: ''
+  /api/catalog/procedures/:
+    get:
+      operationId: catalog_procedures_list
+      description: Active procedures available to the user's clinic.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - catalog
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Procedure'
+          description: ''
+  /api/catalog/procedures/{id}/:
+    get:
+      operationId: catalog_procedures_retrieve
+      description: Active procedures available to the user's clinic.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this procedure.
+        required: true
+      tags:
+      - catalog
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Procedure'
+          description: ''
+  /api/doctors/:
+    get:
+      operationId: doctors_list
+      description: |-
+        Doctors the user may select (CLINIC-002/003).
+
+        When exactly one doctor is returned, clients select it automatically.
+      tags:
+      - doctors
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorSummary'
+          description: ''
+  /api/health/:
+    get:
+      operationId: health_retrieve
+      description: Liveness/readiness probe for load balancers and deployment checks.
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+  /api/patients/:
+    get:
+      operationId: patients_list
+      description: Patient registration and records, scoped to clinic and permitted
+        doctors.
+      parameters:
+      - in: query
+        name: doctor
+        schema:
+          type: integer
+        description: Only patients of this doctor.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Matches name or phone.
+      tags:
+      - patients
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPatientList'
+          description: ''
+    post:
+      operationId: patients_create
+      description: Patient registration and records, scoped to clinic and permitted
+        doctors.
+      tags:
+      - patients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/patients/{id}/:
+    get:
+      operationId: patients_retrieve
+      description: Patient registration and records, scoped to clinic and permitted
+        doctors.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - patients
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    put:
+      operationId: patients_update
+      description: Patient registration and records, scoped to clinic and permitted
+        doctors.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - patients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    patch:
+      operationId: patients_partial_update
+      description: Patient registration and records, scoped to clinic and permitted
+        doctors.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - patients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/patients/{id}/balance/:
+    get:
+      operationId: patients_balance_retrieve
+      description: Amount due, paid and remaining over the patient's appointments
+        (PAY-003, PAY-007).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - patients
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+          description: ''
+  /api/payment-methods/:
+    get:
+      operationId: payment_methods_list
+      description: Active payment methods configured in Django Admin (PAY-005).
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - payment-methods
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethod'
+          description: ''
+  /api/payment-methods/{id}/:
+    get:
+      operationId: payment_methods_retrieve
+      description: Active payment methods configured in Django Admin (PAY-005).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this payment method.
+        required: true
+      tags:
+      - payment-methods
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethod'
+          description: ''
+  /api/payments/:
+    get:
+      operationId: payments_list
+      description: Payments received, before or after the session (PAY-002, PAY-004).
+      parameters:
+      - in: query
+        name: appointment
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - payments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentList'
+          description: ''
+    post:
+      operationId: payments_create
+      description: Payments received, before or after the session (PAY-002, PAY-004).
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/{id}/:
+    get:
+      operationId: payments_retrieve
+      description: Payments received, before or after the session (PAY-002, PAY-004).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this payment.
+        required: true
+      tags:
+      - payments
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/visits/:
+    get:
+      operationId: visits_list
+      description: 'Clinical visits: recording, completion and patient history (VISIT-001..008).'
+      parameters:
+      - in: query
+        name: doctor
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: integer
+        description: Visit history of one patient.
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - COMPLETED
+      tags:
+      - visits
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVisitList'
+          description: ''
+  /api/visits/{id}/:
+    get:
+      operationId: visits_retrieve
+      description: 'Clinical visits: recording, completion and patient history (VISIT-001..008).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    put:
+      operationId: visits_update
+      description: 'Clinical visits: recording, completion and patient history (VISIT-001..008).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisitRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisitRequest'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    patch:
+      operationId: visits_partial_update
+      description: 'Clinical visits: recording, completion and patient history (VISIT-001..008).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitRequest'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/complete/:
+    post:
+      operationId: visits_complete_create
+      description: Complete the visit; it stays in the patient's history (VISIT-007/008).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/follow-ups/:
+    post:
+      operationId: visits_follow_ups_create
+      description: Book a follow-up appointment with the same doctor (VISIT-006).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/medications/:
+    post:
+      operationId: visits_medications_create
+      description: Prescribe a catalog medication with quantity and duration (MED-002).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitMedicationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisitMedicationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisitMedicationRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/medications/{entry_id}/:
+    delete:
+      operationId: visits_medications_destroy
+      description: 'Clinical visits: recording, completion and patient history (VISIT-001..008).'
+      parameters:
+      - in: path
+        name: entry_id
+        schema:
+          type: string
+          pattern: ^[0-9]+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/visits/{id}/procedures/:
+    post:
+      operationId: visits_procedures_create
+      description: Record tooth/procedure information (VISIT-003).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitProcedureRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisitProcedureRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisitProcedureRequest'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/procedures/{entry_id}/:
+    delete:
+      operationId: visits_procedures_destroy
+      description: 'Clinical visits: recording, completion and patient history (VISIT-001..008).'
+      parameters:
+      - in: path
+        name: entry_id
+        schema:
+          type: string
+          pattern: ^[0-9]+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    AmountDueRequest:
+      type: object
+      properties:
+        amount_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - amount_due
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          allOf:
+          - $ref: '#/components/schemas/PatientSummary'
+          readOnly: true
+        doctor:
+          allOf:
+          - $ref: '#/components/schemas/DoctorSummary'
+          readOnly: true
+        scheduled_at:
+          type: string
+          format: date-time
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AppointmentStatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        notes:
+          type: string
+        follow_up_of:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: The visit in which the doctor requested this follow-up.
+        visit_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        billing:
+          allOf:
+          - $ref: '#/components/schemas/Billing'
+          nullable: true
+          readOnly: true
+          description: Present only for users with the payments.view_payment permission.
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - billing
+      - cancelled_at
+      - checked_in_at
+      - created_at
+      - doctor
+      - follow_up_of
+      - id
+      - patient
+      - scheduled_at
+      - status
+      - status_display
+      - visit_id
+    AppointmentRequest:
+      type: object
+      properties:
+        patient_id:
+          type: integer
+          writeOnly: true
+        doctor_id:
+          type: integer
+          writeOnly: true
+          description: Optional when the user has exactly one permitted doctor.
+        scheduled_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+      required:
+      - patient_id
+      - scheduled_at
+    AppointmentStatusEnum:
+      enum:
+      - SCHEDULED
+      - CHECKED_IN
+      - IN_VISIT
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `SCHEDULED` - Scheduled
+        * `CHECKED_IN` - Waiting for doctor
+        * `IN_VISIT` - In visit
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    Balance:
+      type: object
+      description: Totals over the patient's non-cancelled appointments (PAY-003,
+        PAY-007).
+      properties:
+        amount_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        amount_paid:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        remaining_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        appointments_pending:
+          type: integer
+        appointments_not_set:
+          type: integer
+      required:
+      - amount_due
+      - amount_paid
+      - appointments_not_set
+      - appointments_pending
+      - remaining_amount
+    Billing:
+      type: object
+      description: Billing summary of one appointment.
+      properties:
+        amount_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        amount_paid:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        remaining_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        payment_status_display:
+          type: string
+      required:
+      - amount_due
+      - amount_paid
+      - payment_status
+      - payment_status_display
+      - remaining_amount
+    BlankEnum:
+      enum:
+      - ''
+    ClinicSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        doctor_count:
+          type: integer
+          readOnly: true
+      required:
+      - doctor_count
+      - id
+      - name
+    DoctorSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 150
+      required:
+      - full_name
+      - id
+    DoctorSummaryRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+      required:
+      - full_name
+    FollowUp:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        scheduled_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AppointmentStatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - scheduled_at
+      - status
+      - status_display
+    FollowUpRequest:
+      type: object
+      properties:
+        scheduled_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+      required:
+      - scheduled_at
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+      required:
+      - database
+      - status
+    LoginRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          description: |-
+            Role of the login page. When sent, accounts of another role are refused.
+
+            * `DOCTOR` - Doctor
+            * `ASSISTANT` - Assistant
+            * `RECEPTIONIST` - Receptionist
+      required:
+      - password
+      - phone
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/Me'
+      required:
+      - token
+      - user
+    Me:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          title: Phone number
+          description: Used to log in. Spaces and dashes are removed automatically.
+          maxLength: 16
+        full_name:
+          type: string
+          maxLength: 150
+        role:
+          description: |-
+            Clinic role. Leave empty only for platform administrators.
+
+            * `DOCTOR` - Doctor
+            * `ASSISTANT` - Assistant
+            * `RECEPTIONIST` - Receptionist
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        role_display:
+          type: string
+          readOnly: true
+        clinic:
+          allOf:
+          - $ref: '#/components/schemas/ClinicSummary'
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        permitted_doctors:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+      required:
+      - clinic
+      - full_name
+      - id
+      - permissions
+      - permitted_doctors
+      - phone
+      - role_display
+    Medication:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        details:
+          type: string
+          description: Optional strength/form, e.g. 500 mg capsule.
+          maxLength: 200
+      required:
+      - id
+      - name
+    MedicationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        details:
+          type: string
+          description: Optional strength/form, e.g. 500 mg capsule.
+          maxLength: 200
+      required:
+      - name
+    PaginatedAppointmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+    PaginatedPatientList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Patient'
+    PaginatedPaymentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    PaginatedVisitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Visit'
+    PatchedAppointmentRequest:
+      type: object
+      properties:
+        patient_id:
+          type: integer
+          writeOnly: true
+        doctor_id:
+          type: integer
+          writeOnly: true
+          description: Optional when the user has exactly one permitted doctor.
+        scheduled_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+    PatchedPatientRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        address:
+          type: string
+        is_minor:
+          type: boolean
+          title: Patient is a minor
+        guardian_name:
+          type: string
+          maxLength: 150
+        guardian_phone:
+          type: string
+          maxLength: 32
+        doctor_ids:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+          description: Doctors to associate with the patient. Optional when the user
+            has exactly one permitted doctor (it is selected automatically). On update,
+            doctors are added and never removed.
+    PatchedVisitRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+          title: Visit notes
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+    Patient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        address:
+          type: string
+        is_minor:
+          type: boolean
+          title: Patient is a minor
+        guardian_name:
+          type: string
+          maxLength: 150
+        guardian_phone:
+          type: string
+          maxLength: 32
+        doctors:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorSummary'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - doctors
+      - full_name
+      - id
+      - phone
+      - updated_at
+    PatientRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        address:
+          type: string
+        is_minor:
+          type: boolean
+          title: Patient is a minor
+        guardian_name:
+          type: string
+          maxLength: 150
+        guardian_phone:
+          type: string
+          maxLength: 32
+        doctor_ids:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+          description: Doctors to associate with the patient. Optional when the user
+            has exactly one permitted doctor (it is selected automatically). On update,
+            doctors are added and never removed.
+      required:
+      - full_name
+      - phone
+    PatientSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 16
+        is_minor:
+          type: boolean
+          title: Patient is a minor
+      required:
+      - full_name
+      - id
+      - phone
+    PatientSummaryRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 16
+        is_minor:
+          type: boolean
+          title: Patient is a minor
+      required:
+      - full_name
+      - phone
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        appointment_id:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethod'
+          readOnly: true
+        note:
+          type: string
+          maxLength: 200
+        received_by:
+          type: string
+          readOnly: true
+        received_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - appointment_id
+      - id
+      - method
+      - received_at
+      - received_by
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 50
+        code:
+          type: string
+          maxLength: 30
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - code
+      - id
+      - name
+    PaymentMethodRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        code:
+          type: string
+          minLength: 1
+          maxLength: 30
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - code
+      - name
+    PaymentRequest:
+      type: object
+      properties:
+        appointment_id:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        method_id:
+          type: integer
+          writeOnly: true
+        note:
+          type: string
+          maxLength: 200
+      required:
+      - amount
+      - appointment_id
+      - method_id
+    PaymentStatusEnum:
+      enum:
+      - NOT_SET
+      - PENDING
+      - PAID
+      type: string
+      description: |-
+        * `NOT_SET` - Amount due not set
+        * `PENDING` - Payment pending
+        * `PAID` - Paid
+    Procedure:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        code:
+          type: string
+          description: Optional internal or ADA code.
+          maxLength: 20
+      required:
+      - id
+      - name
+    ProcedureRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        code:
+          type: string
+          description: Optional internal or ADA code.
+          maxLength: 20
+      required:
+      - name
+    Queue:
+      type: object
+      properties:
+        waiting:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+        in_visit:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+      required:
+      - in_visit
+      - waiting
+    RoleEnum:
+      enum:
+      - DOCTOR
+      - ASSISTANT
+      - RECEPTIONIST
+      type: string
+      description: |-
+        * `DOCTOR` - Doctor
+        * `ASSISTANT` - Assistant
+        * `RECEPTIONIST` - Receptionist
+    Visit:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/VisitStatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        patient:
+          allOf:
+          - $ref: '#/components/schemas/PatientSummary'
+          readOnly: true
+        doctor:
+          allOf:
+          - $ref: '#/components/schemas/DoctorSummary'
+          readOnly: true
+        appointment:
+          type: integer
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        notes:
+          type: string
+          title: Visit notes
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+        procedures:
+          type: array
+          items:
+            $ref: '#/components/schemas/VisitProcedure'
+          readOnly: true
+        medications:
+          type: array
+          items:
+            $ref: '#/components/schemas/VisitMedication'
+          readOnly: true
+        follow_ups:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowUp'
+          readOnly: true
+        can_edit:
+          type: boolean
+          readOnly: true
+      required:
+      - appointment
+      - can_edit
+      - completed_at
+      - doctor
+      - follow_ups
+      - id
+      - medications
+      - patient
+      - procedures
+      - started_at
+      - status
+      - status_display
+    VisitMedication:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        medication:
+          allOf:
+          - $ref: '#/components/schemas/Medication'
+          readOnly: true
+        quantity:
+          type: string
+          maxLength: 100
+        duration:
+          type: string
+          maxLength: 100
+      required:
+      - duration
+      - id
+      - medication
+      - quantity
+    VisitMedicationRequest:
+      type: object
+      properties:
+        medication_id:
+          type: integer
+          writeOnly: true
+        quantity:
+          type: string
+          minLength: 1
+          maxLength: 100
+        duration:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - duration
+      - medication_id
+      - quantity
+    VisitProcedure:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        procedure:
+          allOf:
+          - $ref: '#/components/schemas/Procedure'
+          readOnly: true
+        tooth:
+          type: string
+          maxLength: 2
+        notes:
+          type: string
+      required:
+      - id
+      - procedure
+    VisitProcedureRequest:
+      type: object
+      properties:
+        procedure_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: Catalog procedure, where applicable (DX-001).
+        tooth:
+          type: string
+          maxLength: 2
+        notes:
+          type: string
+    VisitRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+          title: Visit notes
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+    VisitStatusEnum:
+      enum:
+      - ACTIVE
+      - COMPLETED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `COMPLETED` - Completed
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

@@ -13,6 +13,7 @@ api_patterns = [
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularRedocView.as_view(url_name="schema"), name="api-docs"),
     path("", include("apps.accounts.urls")),
+    path("", include("apps.core.urls")),
 ]
 
 urlpatterns = [

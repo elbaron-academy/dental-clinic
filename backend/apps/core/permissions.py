@@ -36,6 +36,9 @@ class ActionPermission(BasePermission):
         action = getattr(view, "action", None)
         if action == "metadata":
             return True
+        action_map = getattr(view, "action_map", None)
+        if action is None and action_map is not None and request.method.lower() not in action_map:
+            return True  # Unsupported method: let DRF answer 405 Method Not Allowed.
         required = getattr(view, "action_permissions", {}).get(action)
         if required is None:
             return False
