@@ -1,6 +1,6 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { makeVisit } from '../../test/fixtures'
 import { makeUser, mockApi, renderWithAuth } from '../../test/utils'
 import { VisitPage } from './VisitPage'
@@ -26,10 +26,11 @@ describe('visit page (VISIT-001..007)', () => {
         body: { ...visit, diagnosis: 'Caries', status: 'COMPLETED', status_display: 'Completed', can_edit: false },
       }),
     })
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderWithAuth(<VisitPage />, { user: doctor, path: '/visits/3', route: '/visits/:id' })
     await userEvent.type(await screen.findByLabelText('Diagnosis'), 'Caries')
     await userEvent.click(screen.getByRole('button', { name: 'Complete visit' }))
+    const dialog = screen.getByRole('alertdialog', { name: 'Complete this visit?' })
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Yes, complete' }))
     expect(await screen.findByText(/completed and kept in the patient's history/)).toBeInTheDocument()
     const methods = calls.map((c) => `${c.method} ${c.path}`)
     expect(methods).toContain('PATCH /api/visits/3/')

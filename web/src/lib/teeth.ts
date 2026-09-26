@@ -25,21 +25,27 @@ export function dentitionOf(tooth: string): Dentition {
   return Number(tooth[0]) >= 5 ? 'primary' : 'permanent'
 }
 
-/** Black or white text, whichever reads better on the given #RRGGBB background. */
-export function textColorOn(hex: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => {
-    const c = parseInt(hex.slice(i, i + 2), 16) / 255
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  })
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-  return luminance > 0.4 ? '#0f1f1d' : '#ffffff'
+export type ToothKind = 'incisor' | 'canine' | 'premolar' | 'molar'
+
+/** Tooth type from its FDI position: 1–2 incisors, 3 canine, then premolars/molars. */
+export function toothKind(tooth: string): ToothKind {
+  const position = Number(tooth[1])
+  if (position <= 2) return 'incisor'
+  if (position === 3) return 'canine'
+  if (dentitionOf(tooth) === 'primary') return 'molar'
+  return position <= 5 ? 'premolar' : 'molar'
 }
 
-/** One color fills the tooth; several split it into equal vertical bands. */
-export function toothBackground(colors: string[]): string | undefined {
-  if (colors.length === 0) return undefined
-  if (colors.length === 1) return colors[0]
+/** Upper jaw: quadrants 1, 2 (permanent) and 5, 6 (primary). */
+export function isUpper(tooth: string): boolean {
+  return ['1', '2', '5', '6'].includes(tooth[0])
+}
+
+/** Equal color bands for a tooth marked with several actions (SVG gradient stops). */
+export function colorBands(colors: string[]): { offset: string; color: string }[] {
   const step = 100 / colors.length
-  const stops = colors.map((color, i) => `${color} ${i * step}% ${(i + 1) * step}%`)
-  return `linear-gradient(90deg, ${stops.join(', ')})`
+  return colors.flatMap((color, i) => [
+    { offset: `${i * step}%`, color },
+    { offset: `${(i + 1) * step}%`, color },
+  ])
 }

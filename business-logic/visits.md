@@ -20,9 +20,10 @@ permanent 11–48, primary 51–85).
   extraction, implant, scaling), with optional notes.
 - The same action can be marked only once per tooth in a visit. A marked
   action can be removed while the visit is active.
-- Every action type has a color. Marked teeth take the color of their
-  action (several actions split the tooth into color bands), and the chart
-  shows a legend.
+- The chart draws every tooth as a tooth image (incisor, canine, premolar
+  or molar shape, lower jaw mirrored) with its number. Every action type has
+  a color: the crown of a marked tooth takes the color of its action (several
+  actions split the crown into color bands), and the chart shows a legend.
 - Dental action types and their colors are clinical catalog data managed in
   Django Admin. Inactive types stay in history but cannot be selected.
 - While charting, the doctor can add a new dental action (name and color).

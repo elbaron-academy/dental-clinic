@@ -40,6 +40,14 @@ export function statusBadge(page: Page) {
   return page.locator('.page-header .badge')
 }
 
+/** Answers the in-app confirm dialog (it replaced window.confirm). */
+export async function confirmDialog(page: Page, button: string) {
+  const dialog = page.getByRole('alertdialog')
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole('button', { name: button, exact: true }).click()
+  await expect(dialog).toHaveCount(0)
+}
+
 export async function logout(page: Page) {
   await page.getByRole('button', { name: 'Log out' }).click()
   await expect(page).toHaveURL(/\/login\/[a-z]+$/)

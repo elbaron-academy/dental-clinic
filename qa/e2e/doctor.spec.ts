@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { Api, loginAs, statusBadge, uniqueName, USERS, waitingPatientOfAmal } from './support'
+import { Api, confirmDialog, loginAs, statusBadge, uniqueName, USERS, waitingPatientOfAmal } from './support'
 
 // VISIT-001..008, MED-002, DX-001, APPT-003, APPT-006, LIFE-003
 test.describe('Doctor visit', () => {
@@ -38,8 +38,8 @@ test.describe('Doctor visit', () => {
     await page.getByRole('button', { name: 'Book follow-up' }).click()
     await expect(page.getByRole('list', { name: 'Follow-up visits' })).toContainText('Scheduled')
 
-    page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: 'Complete visit' }).click()
+    await confirmDialog(page, 'Yes, complete')
     await expect(statusBadge(page)).toHaveText('Completed')
     await expect(page.getByText(/completed and kept in the patient's history/)).toBeVisible()
     await expect(page.getByRole('button', { name: 'Complete visit' })).toHaveCount(0)
@@ -59,8 +59,8 @@ test.describe('Doctor visit', () => {
     const started = await rana.startVisit(appointment.id)
     await loginAs(page, USERS.amal)
     await page.goto(`/visits/${started.visit_id}`)
-    page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: 'Complete visit' }).click()
+    await confirmDialog(page, 'Yes, complete')
     await expect(page.getByRole('alert')).toContainText('Record the session outcome')
     await expect(statusBadge(page)).toHaveText('Active')
   })

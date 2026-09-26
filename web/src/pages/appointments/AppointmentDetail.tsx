@@ -4,6 +4,7 @@ import { ApiError } from '../../api/client'
 import * as api from '../../api/endpoints'
 import type { Appointment } from '../../api/types'
 import { useAuth, useUser } from '../../auth/context'
+import { useConfirm } from '../../lib/useConfirm'
 import { DoctorSelect } from '../../components/DoctorSelect'
 import { Card, ErrorAlert, Field, Loading, PageHeader, StatusBadge } from '../../components/ui'
 import { dateTimeInputToIso, formatDateTime, toDateTimeInput } from '../../lib/format'
@@ -18,6 +19,7 @@ export function AppointmentDetail() {
   const [actionError, setActionError] = useState<unknown>(null)
   const [pending, setPending] = useState(false)
   const [editing, setEditing] = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   if (appointment.loading && !appointment.data) return <Loading />
   if (appointment.error && !appointment.data) return <ErrorAlert error={appointment.error} />
@@ -44,6 +46,7 @@ export function AppointmentDetail() {
   const open = a.status === 'SCHEDULED' || a.status === 'CHECKED_IN'
   return (
     <>
+      {dialog}
       <PageHeader
         title={a.patient.full_name}
         subtitle={
@@ -110,8 +113,15 @@ export function AppointmentDetail() {
                 type="button"
                 className="btn btn-danger"
                 disabled={pending}
-                onClick={() => {
-                  if (window.confirm('Cancel this appointment?')) void act(() => api.cancelAppointment(a.id))
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: 'Cancel this appointment?',
+                    message: `${a.patient.full_name} · ${formatDateTime(a.scheduled_at)}. A cancelled appointment cannot be checked in, started or paid.`,
+                    confirmLabel: 'Yes, cancel it',
+                    cancelLabel: 'Keep it',
+                    tone: 'danger',
+                  })
+                  if (ok) void act(() => api.cancelAppointment(a.id))
                 }}
               >
                 Cancel appointment

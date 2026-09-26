@@ -87,7 +87,7 @@ exception: it is written but, by design, not verified.**
 | CHART-004 | Each visit has its own chart (visit isolation) | visits.md | 10 | BE `visits/tests/test_tooth_actions.py::TestVisitIsolation`; API-QA `test_dental_chart.py::test_each_visit_has_its_own_chart`, `::test_charts_of_two_patients_do_not_mix`; E2E `dental-chart.spec.ts::each visit starts with an empty chart` |
 | CHART-006 | The doctor adds a new dental action (name, color) from the chart; it is marked on the tooth and shared within the clinic (CR-024) | visits.md | 11 | BE `visits/tests/test_tooth_actions.py::TestDoctorAddsActionTypes`, `accounts/tests/test_permissions.py`; API-QA `test_dental_chart.py::test_doctor_adds_a_new_action_and_marks_it`, `::test_only_doctors_add_actions`; Web `DentalChart.test.tsx`, `VisitPage.test.tsx`; E2E `dental-chart.spec.ts::doctor adds a new action…` |
 | CHART-007 | The patient page shows the dental chart of each charted visit | visits.md | 11 | Web `pages/patients/PatientDetail.test.tsx`; E2E `dental-chart.spec.ts::patient page shows the dental chart…` |
-| CHART-005 | Chart colors, legend, permanent/primary teeth and phone layout in the Web/PWA | visits.md | 10 | Web `DentalChart.test.tsx`, `lib/teeth.test.ts`; E2E `dental-chart.spec.ts` (desktop + `@mobile`) |
+| CHART-005 | Chart drawn as tooth images by type (Sprint 12), colors, legend, permanent/primary teeth and phone layout in the Web/PWA | visits.md | 10, 12 | Web `DentalChart.test.tsx`, `lib/teeth.test.ts`; E2E `dental-chart.spec.ts` (desktop + `@mobile`) |
 
 ## Patient lifecycle
 
@@ -124,6 +124,7 @@ exception: it is written but, by design, not verified.**
 | ADMIN-001 | Doctors have their own Django Admin page (`accounts.Doctor` proxy) | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_doctor_page_*`, `::test_admin_pages_load` |
 | ADMIN-002 | Django Admin uses the django-jazzmin theme | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_admin_pages_load` |
 | OPS-001 | Deployment to the production VM (nginx, gunicorn/systemd, HTTPS) | product owner, 2026-09-26 | 08 | `DEPLOY_TODO.md`, `deploy-details.txt`; health check in `backend/deploy/deploy.sh` and `web/deploy/deploy.sh` |
+| UI-001 | Confirmations use an in-app dialog instead of the browser's `window.confirm` (complete visit, cancel appointment); in-page alerts have icons | product owner, 2026-09-27 | 12 | Web `src/lib/useConfirm.test.tsx`, `pages/visits/VisitPage.test.tsx`; E2E `confirmDialog` helper in `support.ts`, `dental-chart.spec.ts::teeth are drawn as tooth images; cancelling the confirm dialog…`, `reception.spec.ts` |
 | OPS-002 | Web/PWA shows its version and build commit (footer, login pages, and the top bar since Sprint 11); the PWA checks for new deploys every 10 minutes and on return to the app | product owner, 2026-09-27 | 09, 11 | Web `src/components/AppVersion.test.tsx` (`src/lib/version.ts`); E2E `dental-chart.spec.ts::the app version is shown in the top bar` |
 | OPS-003 | Push to the deploy branch deploys automatically after CI passes | product owner, 2026-09-27 | 09 | `.github/workflows/ci.yml` (`deploy` job), `scripts/ci-deploy-forced-command.sh` |
 

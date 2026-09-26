@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
-import { loginAs, logout, statusBadge, USERS, waitingPatientOfAmal } from './support'
+import { confirmDialog, loginAs, logout, statusBadge, USERS, waitingPatientOfAmal } from './support'
 
 // CHART-001..004 (CR-023): dental chart on the doctor visit page.
 
@@ -33,12 +33,12 @@ test.describe('Dental chart', () => {
     await picker(page, '36').getByRole('button', { name: 'Filling' }).click()
     await expect(page.getByRole('button', { name: 'Tooth 36: Filling' })).toBeVisible()
     // Filling is blue (#2563EB) by default.
-    await expect(tooth(page, '36')).toHaveCSS('background-color', 'rgb(37, 99, 235)')
+    await expect(tooth(page, '36').locator('.tooth-crown')).toHaveAttribute('fill', '#2563EB')
     await expect(picker(page, '36').getByRole('button', { name: 'Filling' })).toHaveAttribute('aria-pressed', 'true')
 
     await picker(page, '36').getByRole('button', { name: 'Caries' }).click()
     await expect(page.getByRole('button', { name: 'Tooth 36: Filling, Caries' })).toBeVisible()
-    await expect(tooth(page, '36')).toHaveCSS('background-image', /linear-gradient/)
+    await expect(tooth(page, '36').locator('.tooth-crown')).toHaveAttribute('fill', /^url\(#tooth-/)
 
     const list = page.getByRole('list', { name: 'Tooth actions' })
     await expect(list).toContainText('Tooth 36')
@@ -70,8 +70,8 @@ test.describe('Dental chart', () => {
     await picker(page, '11').getByRole('button', { name: 'Crown' }).click()
     await expect(page.getByRole('button', { name: 'Tooth 11: Crown' })).toBeVisible()
 
-    page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: 'Complete visit' }).click()
+    await confirmDialog(page, 'Yes, complete')
     await expect(statusBadge(page)).toHaveText('Completed')
     await expect(page.getByRole('img', { name: 'Tooth 11: Crown' })).toBeVisible()
     await expect(page.getByRole('button', { name: /^Tooth / })).toHaveCount(0)
@@ -88,8 +88,8 @@ test.describe('Dental chart', () => {
     await tooth(page, '46').click()
     await picker(page, '46').getByRole('button', { name: 'Root canal' }).click()
     await expect(page.getByRole('button', { name: 'Tooth 46: Root canal' })).toBeVisible()
-    page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: 'Complete visit' }).click()
+    await confirmDialog(page, 'Yes, complete')
     await expect(statusBadge(page)).toHaveText('Completed')
 
     const amal = (await rana.doctors()).find((d) => d.full_name === USERS.amal.name)!
@@ -149,7 +149,7 @@ test.describe('Dental chart', () => {
     await form.getByLabel('Color').fill('#db2777')
     await form.getByRole('button', { name: 'Add to tooth 12' }).click()
     await expect(page.getByRole('button', { name: `Tooth 12: ${name}` })).toBeVisible()
-    await expect(tooth(page, '12')).toHaveCSS('background-color', 'rgb(219, 39, 119)')
+    await expect(tooth(page, '12').locator('.tooth-crown')).toHaveAttribute('fill', '#DB2777')
     await expect(page.getByRole('list', { name: 'Chart legend' })).toContainText(name)
 
     // Offered on other teeth and after a reload; duplicates are refused.
@@ -183,6 +183,29 @@ test.describe('Dental chart', () => {
   test('the app version is shown in the top bar', async ({ page }) => {
     await loginAs(page, USERS.amal)
     await expect(page.getByTestId('topbar-version')).toHaveText(/^v\d+\.\d+\.\d+$/)
+  })
+
+  test('teeth are drawn as tooth images; cancelling the confirm dialog keeps the visit open', async ({ page, request }) => {
+    const { visitId } = await startedVisit(request)
+    await loginAs(page, USERS.amal)
+    await page.goto(`/visits/${visitId}`)
+    await expect(page.locator('.dental-chart .tooth svg.tooth-image')).toHaveCount(32)
+    await expect(tooth(page, '16')).toHaveClass(/tooth-molar/)
+    await expect(tooth(page, '16').locator('.tooth-root')).toHaveCount(2)
+    await expect(tooth(page, '11')).toHaveClass(/tooth-incisor/)
+    await expect(tooth(page, '11')).toContainText('11')
+
+    await tooth(page, '16').click()
+    await picker(page, '16').getByRole('button', { name: 'Filling' }).click()
+    await page.getByRole('button', { name: 'Complete visit' }).click()
+    const dialog = page.getByRole('alertdialog', { name: 'Complete this visit?' })
+    await expect(dialog).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog).toHaveCount(0)
+    await expect(statusBadge(page)).toHaveText('Active')
+    await page.getByRole('button', { name: 'Complete visit' }).click()
+    await dialog.getByRole('button', { name: 'Not yet' }).click()
+    await expect(statusBadge(page)).toHaveText('Active')
   })
 })
 

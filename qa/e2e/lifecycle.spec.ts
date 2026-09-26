@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { Api, loginAs, logout, uniqueName, uniquePhone, USERS } from './support'
+import { Api, confirmDialog, loginAs, logout, uniqueName, uniquePhone, USERS } from './support'
 
 // LIFE-001: Registered -> Appointment -> Checked in -> Waiting -> Active visit
 // -> Recorded -> Completed -> Payment pending/paid -> optional follow-up.
@@ -31,8 +31,8 @@ test('full patient lifecycle across reception and doctor', async ({ page, reques
   await page.getByLabel('Follow-up notes').fill('Review in two weeks')
   await page.getByRole('button', { name: 'Book follow-up' }).click()
   await expect(page.getByRole('list', { name: 'Follow-up visits' })).toBeVisible()
-  page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Complete visit' }).click()
+  await confirmDialog(page, 'Yes, complete')
   await expect(page.locator('.page-header .badge').first()).toHaveText('Completed')
   await logout(page)
 

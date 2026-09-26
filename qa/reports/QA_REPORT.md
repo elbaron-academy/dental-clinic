@@ -127,3 +127,13 @@ Run on the production VM in `~/dental-qa` (own database and ports; production un
 | Patient-page chart | CHART-007 | — | `dental-chart.spec.ts::patient page shows the dental chart…` | ✅ |
 | Version in the top bar | OPS-002 | — | `dental-chart.spec.ts::the app version is shown in the top bar` | ✅ |
 
+## 9. Sprint 12 — Tooth images, in-app dialogs (2026-09-27)
+
+Run on the production VM in `~/dental-qa` (own database and ports; production untouched).
+UI only: no backend change.
+
+| Suite | Result |
+|---|---|
+| Web lint / types / unit | ✅ clean, **62 passed** (tooth drawing, `useConfirm`) |
+| Web + PWA e2e (Chromium) | ✅ **46 passed**, 0 flaky. The e2e suites answer the in-app dialog (`confirmDialog` in `support.ts`) instead of the browser dialog. |
+

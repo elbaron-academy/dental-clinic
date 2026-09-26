@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { Api, loginAs, statusBadge, uniqueName, uniquePhone, USERS, waitingPatientOfAmal } from './support'
+import { Api, confirmDialog, loginAs, statusBadge, uniqueName, uniquePhone, USERS, waitingPatientOfAmal } from './support'
 
 // PATIENT-001..005, CLINIC-002/003, APPT-001..005, LIFE-002
 test.describe('Reception workflow', () => {
@@ -128,8 +128,9 @@ test.describe('Reception workflow', () => {
     await page.getByRole('button', { name: 'Create appointment' }).click()
     await expect(statusBadge(page)).toHaveText('Waiting for doctor')
 
-    page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: 'Cancel appointment' }).click()
+    await expect(page.getByRole('alertdialog', { name: 'Cancel this appointment?' })).toBeVisible()
+    await confirmDialog(page, 'Yes, cancel it')
     await expect(statusBadge(page)).toHaveText('Cancelled')
     await expect(page.getByRole('button', { name: 'Check in' })).toHaveCount(0)
   })

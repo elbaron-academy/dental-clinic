@@ -4,6 +4,7 @@ import { ApiError } from '../../api/client'
 import * as api from '../../api/endpoints'
 import { useAuth } from '../../auth/context'
 import type { CatalogMedication, CatalogProcedure, Visit } from '../../api/types'
+import { useConfirm } from '../../lib/useConfirm'
 import { DentalChart, type NewActionInput } from '../../components/DentalChart'
 import { Card, EmptyState, ErrorAlert, Field, Loading, PageHeader, StatusBadge, SuccessAlert } from '../../components/ui'
 import { VisitDetails } from '../../components/VisitDetails'
@@ -63,6 +64,7 @@ function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visi
   const medications = useAsync(() => api.listMedications(), [])
   const dentalActions = useAsync(() => api.listDentalActionTypes(), [])
   const { hasPerm } = useAuth()
+  const { confirm, dialog } = useConfirm()
 
   /** The doctor adds a new action while charting; it joins the picker (CHART-006). */
   async function createActionType(input: NewActionInput) {
@@ -98,7 +100,13 @@ function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visi
   }
 
   async function onComplete() {
-    if (!window.confirm('Complete this visit? It can no longer be changed afterwards.')) return
+    const ok = await confirm({
+      title: 'Complete this visit?',
+      message: "The visit can no longer be changed afterwards. It stays in the patient's history.",
+      confirmLabel: 'Yes, complete',
+      cancelLabel: 'Not yet',
+    })
+    if (!ok) return
     setPending(true)
     setError(null)
     try {
@@ -118,6 +126,7 @@ function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visi
 
   return (
     <>
+      {dialog}
       <ErrorAlert error={error} />
       <Card title="Session notes">
         <form className="form" onSubmit={onSave}>

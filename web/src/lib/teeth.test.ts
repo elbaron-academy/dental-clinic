@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHART_ROWS, dentitionOf, textColorOn, toothBackground } from './teeth'
+import { CHART_ROWS, colorBands, dentitionOf, isUpper, toothKind } from './teeth'
 
 describe('dental chart helpers (CR-011, CR-023)', () => {
   it('lays out FDI teeth as the dentist faces the patient', () => {
@@ -25,15 +25,21 @@ describe('dental chart helpers (CR-011, CR-023)', () => {
     expect(dentitionOf('85')).toBe('primary')
   })
 
-  it('picks readable text on the tooth color', () => {
-    expect(textColorOn('#2563EB')).toBe('#ffffff')
-    expect(textColorOn('#475569')).toBe('#ffffff')
-    expect(textColorOn('#FDE68A')).toBe('#0f1f1d')
+  it('knows the tooth type and jaw', () => {
+    expect(['11', '12', '13', '14', '15', '16', '17', '18'].map(toothKind)).toEqual([
+      'incisor', 'incisor', 'canine', 'premolar', 'premolar', 'molar', 'molar', 'molar',
+    ])
+    expect(['51', '52', '53', '54', '55'].map(toothKind)).toEqual(['incisor', 'incisor', 'canine', 'molar', 'molar'])
+    expect(['18', '28', '55', '65'].every(isUpper)).toBe(true)
+    expect(['38', '48', '75', '85'].some(isUpper)).toBe(false)
   })
 
-  it('fills one color or splits several into bands', () => {
-    expect(toothBackground([])).toBeUndefined()
-    expect(toothBackground(['#DC2626'])).toBe('#DC2626')
-    expect(toothBackground(['#DC2626', '#2563EB'])).toBe('linear-gradient(90deg, #DC2626 0% 50%, #2563EB 50% 100%)')
+  it('splits several colors into equal bands', () => {
+    expect(colorBands(['#DC2626', '#2563EB'])).toEqual([
+      { offset: '0%', color: '#DC2626' },
+      { offset: '50%', color: '#DC2626' },
+      { offset: '50%', color: '#2563EB' },
+      { offset: '100%', color: '#2563EB' },
+    ])
   })
 })

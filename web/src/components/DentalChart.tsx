@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import { ApiError, errorMessage } from '../api/client'
 import * as api from '../api/endpoints'
 import type { DentalActionType, Visit, VisitToothAction } from '../api/types'
-import { CHART_ROWS, dentitionOf, textColorOn, toothBackground, type Dentition } from '../lib/teeth'
+import { CHART_ROWS, colorBands, dentitionOf, isUpper, toothKind, type Dentition, type ToothKind } from '../lib/teeth'
 import { EmptyState, Field } from './ui'
 
 interface DentalChartProps {
@@ -122,6 +122,52 @@ export function DentalChart({ visit, actionTypes = [], onChange, onCreateType }:
   )
 }
 
+// Tooth outlines in a 40×64 box, drawn as an upper tooth: roots on top, crown
+// at the bottom (toward the bite). Lower teeth are mirrored vertically.
+const ROOTS: Record<ToothKind, string[]> = {
+  incisor: ['M15 36C14.5 24 16.5 10 20 3C23.5 10 25.5 24 25 36Z'],
+  canine: ['M14.5 36C14 22 16.5 6 20 .5C23.5 6 26 22 25.5 36Z'],
+  premolar: ['M13 36C12.5 24 15 11 19 4H21C25 11 27.5 24 27 36Z'],
+  molar: ['M7 36C6 25 7.5 13 11.5 5C14.5 11 16.5 24 18 36Z', 'M22 36C23.5 24 25.5 11 28.5 5C32.5 13 34 25 33 36Z'],
+}
+const CROWNS: Record<ToothKind, string> = {
+  incisor: 'M12.5 34C11.5 44 12 54 14 60Q20 63 26 60C28 54 28.5 44 27.5 34Q20 32 12.5 34Z',
+  canine: 'M11.5 34C10.5 44 12.5 53 20 62C27.5 53 29.5 44 28.5 34Q20 32 11.5 34Z',
+  premolar: 'M9.5 34C8 44 9.5 54 13 59.5Q16.5 62.5 20 60.5Q23.5 62.5 27 59.5C30.5 54 32 44 30.5 34Q20 32 9.5 34Z',
+  molar: 'M5 34C3.5 44 4.5 54 8 59.5Q11.5 62.5 15 60Q20 63 25 60Q28.5 62.5 32 59.5C35.5 54 36.5 44 35 34Q20 31.5 5 34Z',
+}
+const FISSURES: Partial<Record<ToothKind, string>> = {
+  premolar: 'M14 52Q20 55 26 52',
+  molar: 'M10 51Q15 54 20 51Q25 54 30 51M20 51V57',
+}
+
+function ToothImage({ tooth, colors }: { tooth: string; colors: string[] }) {
+  const gradientId = `tooth-${useId().replace(/:/g, '')}`
+  const kind = toothKind(tooth)
+  const crownFill = colors.length === 0 ? 'var(--tooth-enamel)' : colors.length === 1 ? colors[0] : `url(#${gradientId})`
+  return (
+    <svg className="tooth-image" viewBox="0 0 40 64" aria-hidden="true" focusable="false">
+      {colors.length > 1 && (
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="0">
+            {colorBands(colors).map((stop, i) => (
+              <stop key={i} offset={stop.offset} stopColor={stop.color} />
+            ))}
+          </linearGradient>
+        </defs>
+      )}
+      <g transform={isUpper(tooth) ? undefined : 'translate(0 64) scale(1 -1)'}>
+        {ROOTS[kind].map((d) => (
+          <path key={d} className="tooth-root" d={d} />
+        ))}
+        <path className="tooth-crown" d={CROWNS[kind]} fill={crownFill} data-fill={colors.length > 1 ? 'bands' : crownFill} />
+        {FISSURES[kind] && <path className="tooth-fissure" d={FISSURES[kind]} />}
+        {colors.length === 0 && <ellipse className="tooth-shine" cx="15" cy="42" rx="2.2" ry="5" />}
+      </g>
+    </svg>
+  )
+}
+
 function Tooth({
   tooth,
   actions,
@@ -134,17 +180,27 @@ function Tooth({
   onSelect?: (tooth: string) => void
 }) {
   const colors = actions.map((a) => a.action_type.color)
-  const background = toothBackground(colors)
   const label = `Tooth ${tooth}: ${actions.length ? actions.map((a) => a.action_type.name).join(', ') : 'no actions'}`
-  const className = ['tooth', actions.length ? 'tooth-marked' : '', colors.length > 1 ? 'tooth-multi' : '', selected ? 'tooth-selected' : '']
+  const className = [
+    'tooth',
+    `tooth-${toothKind(tooth)}`,
+    isUpper(tooth) ? 'tooth-upper' : 'tooth-lower',
+    actions.length ? 'tooth-marked' : '',
+    selected ? 'tooth-selected' : '',
+  ]
     .filter(Boolean)
     .join(' ')
-  const style = background ? { background, color: colors.length === 1 ? textColorOn(colors[0]) : '#fff' } : undefined
+  const content = (
+    <>
+      <ToothImage tooth={tooth} colors={colors} />
+      <span className="tooth-number">{tooth}</span>
+    </>
+  )
 
   if (!onSelect) {
     return (
-      <span className={className} role="img" aria-label={label} title={label} style={style} data-tooth={tooth}>
-        {tooth}
+      <span className={className} role="img" aria-label={label} title={label} data-tooth={tooth}>
+        {content}
       </span>
     )
   }
@@ -155,11 +211,10 @@ function Tooth({
       aria-label={label}
       aria-pressed={selected}
       title={label}
-      style={style}
       data-tooth={tooth}
       onClick={() => onSelect(tooth)}
     >
-      {tooth}
+      {content}
     </button>
   )
 }

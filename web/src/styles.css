@@ -361,28 +361,182 @@ a:focus-visible {
 
 /* Alerts */
 .alert {
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem 0.7rem 2.6rem;
   margin-bottom: 0.9rem;
   display: flex;
   gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
+  border: 1px solid transparent;
+  border-left-width: 4px;
+  position: relative;
+  font-weight: 500;
+  animation: alert-in 0.2s ease-out;
+}
+
+.alert::before {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff;
 }
 
 .alert-error {
   background: var(--danger-soft);
   color: var(--danger);
+  border-color: rgb(180 35 24 / 25%);
+  border-left-color: var(--danger);
+}
+
+.alert-error::before {
+  content: '!';
+  background: var(--danger);
 }
 
 .alert-success {
   background: var(--success-soft);
   color: var(--success);
+  border-color: rgb(6 118 71 / 25%);
+  border-left-color: var(--success);
+}
+
+.alert-success::before {
+  content: '✓';
+  background: var(--success);
 }
 
 .alert-info {
   background: var(--info-soft);
   color: var(--info);
+  border-color: rgb(23 92 211 / 25%);
+  border-left-color: var(--info);
+}
+
+.alert-info::before {
+  content: 'i';
+  background: var(--info);
+}
+
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Confirm dialog (replaces window.confirm) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgb(15 31 29 / 45%);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: modal-fade 0.15s ease-out;
+}
+
+.modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgb(16 24 40 / 22%);
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem 1rem;
+  animation: modal-pop 0.18s ease-out;
+}
+
+.modal-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.modal-danger .modal-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.modal-body h2 {
+  font-size: 1.1rem;
+  margin: 0.3rem 0 0.35rem;
+}
+
+.modal-message {
+  color: var(--muted);
+  font-size: 0.93rem;
+}
+
+.modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.btn-danger-solid {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger-solid:hover:not(:disabled) {
+  background: #912018;
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: 16px 16px 12px 12px;
+  }
+
+  .modal-actions .btn {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert,
+  .modal,
+  .modal-backdrop {
+    animation: none;
+  }
 }
 
 .offline-banner {
@@ -851,32 +1005,95 @@ textarea {
   width: 100%;
 }
 
+.dental-chart {
+  --tooth-enamel: #ffffff;
+  --tooth-root: #f3ecdc;
+  --tooth-outline: #9aa9a6;
+}
+
 .tooth {
   flex: 1 1 0;
-  max-width: 48px;
+  max-width: 50px;
   min-width: 0;
-  min-height: 44px;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  border: 1.5px solid var(--border);
-  border-radius: 10px 10px 14px 14px;
-  background: var(--surface);
-  color: var(--text);
+  gap: 0.15rem;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
   font: inherit;
-  font-size: 0.8rem;
+  padding: 0.2rem 0.1rem;
+}
+
+.tooth-molar {
+  flex-grow: 1.3;
+}
+
+.tooth-lower {
+  flex-direction: column-reverse;
+}
+
+.tooth-image {
+  width: 100%;
+  max-width: 40px;
+  height: auto;
+  aspect-ratio: 40 / 64;
+  overflow: visible;
+  transition: transform 0.12s;
+}
+
+.tooth-root {
+  fill: var(--tooth-root);
+  stroke: var(--tooth-outline);
+  stroke-width: 1.1;
+}
+
+.tooth-crown {
+  stroke: var(--tooth-outline);
+  stroke-width: 1.3;
+  transition: fill 0.2s;
+}
+
+.tooth-marked .tooth-crown {
+  stroke: rgb(16 24 40 / 55%);
+}
+
+.tooth-fissure {
+  fill: none;
+  stroke: rgb(16 24 40 / 25%);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.tooth-shine {
+  fill: #ffffff;
+  opacity: 0.9;
+}
+
+.tooth-number {
+  font-size: 0.72rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  padding: 0;
+  line-height: 1;
+}
+
+.tooth-marked .tooth-number {
+  color: var(--text);
 }
 
 button.tooth {
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 button.tooth:hover {
-  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+button.tooth:hover .tooth-image {
+  transform: scale(1.06);
 }
 
 button.tooth:focus-visible {
@@ -884,17 +1101,13 @@ button.tooth:focus-visible {
   box-shadow: var(--focus);
 }
 
-.tooth-marked {
-  border-color: rgb(16 24 40 / 25%);
-}
-
-.tooth-multi {
-  text-shadow: 0 0 3px rgb(0 0 0 / 70%);
-}
-
 .tooth-selected {
-  outline: 3px solid var(--brand);
-  outline-offset: 2px;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.tooth-selected .tooth-number {
+  color: var(--brand-strong);
 }
 
 .action-picker {
@@ -1047,7 +1260,7 @@ button.tooth:focus-visible {
   }
 
   .tooth {
-    min-height: 40px;
+    max-width: 44px;
   }
 }
 
