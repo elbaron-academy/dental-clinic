@@ -140,3 +140,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.role == Role.DOCTOR:
             return doctors.filter(pk=self.pk)
         return doctors.filter(assigned_staff=self)
+
+
+class Doctor(User):
+    """Doctors only, so Django Admin can list and add them on their own page.
+
+    A proxy model: no extra table. Saving always stores the Doctor role.
+    """
+
+    class Meta:
+        proxy = True
+        verbose_name = "doctor"
+        verbose_name_plural = "doctors"
+
+    def save(self, *args, **kwargs):
+        self.role = Role.DOCTOR
+        super().save(*args, **kwargs)

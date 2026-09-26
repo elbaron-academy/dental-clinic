@@ -37,6 +37,7 @@ ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1" if DEBUG 
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
+    "jazzmin",  # admin theme; must come before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -171,6 +172,51 @@ SPECTACULAR_SETTINGS = {
         "PaymentStatusEnum": "apps.payments.models.PaymentStatus",
     },
 }
+
+# Django Admin theme (django-jazzmin).
+JAZZMIN_SETTINGS = {
+    "site_title": "Dental Clinic admin",
+    "site_header": "Dental Clinic",
+    "site_brand": "Dental Clinic",
+    "welcome_sign": "Clinic setup and configuration",
+    "copyright": "Dental Clinic",
+    "search_model": ["accounts.User", "patients.Patient"],
+    "user_avatar": None,
+    "show_ui_builder": False,
+    "navigation_expanded": True,
+    "order_with_respect_to": [
+        "clinics",
+        "accounts",
+        "accounts.Doctor",
+        "accounts.User",
+        "patients",
+        "appointments",
+        "visits",
+        "payments",
+        "catalog",
+        "auth",
+    ],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.Group": "fas fa-users",
+        "authtoken.TokenProxy": "fas fa-key",
+        "clinics.Clinic": "fas fa-clinic-medical",
+        "accounts.User": "fas fa-user",
+        "accounts.Doctor": "fas fa-user-md",
+        "patients.Patient": "fas fa-procedures",
+        "appointments.Appointment": "fas fa-calendar-check",
+        "visits.Visit": "fas fa-notes-medical",
+        "payments.Payment": "fas fa-money-bill-wave",
+        "payments.PaymentMethod": "fas fa-credit-card",
+        "catalog.Procedure": "fas fa-tooth",
+        "catalog.Medication": "fas fa-pills",
+    },
+    "default_icon_parents": "fas fa-folder",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": True,
+    "changeform_format": "horizontal_tabs",
+}
+JAZZMIN_UI_TWEAKS = {"theme": "flatly", "navbar": "navbar-dark", "sidebar": "sidebar-dark-primary"}
 
 # CORS: only needed when a browser client is served from another origin
 # (the PWA dev server proxies /api, so it does not need this).

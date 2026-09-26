@@ -1,6 +1,6 @@
 """Acceptance: users-and-roles.md (ROLE-001..004, AUTH-002, CLINIC-003)."""
 
-from .helpers import book, check_in, register, start
+from .helpers import book, check_in, later, register, start
 
 
 def test_receptionist_duties(smile, login):
@@ -36,8 +36,27 @@ def test_doctor_manages_clinical_information_of_assigned_patients(smile, login):
     doctor = login(smile.doctor_a)
     assert doctor.get(f"/api/patients/{patient['id']}/").status_code == 200
     assert doctor.patch(f"/api/visits/{visit_id}/", {"diagnosis": "Caries"}).status_code == 200
-    # Doctors do not do reception work by default.
-    assert doctor.post("/api/patients/", {"full_name": "X", "phone": "0100000000"}).status_code == 403
+    # Other reception work stays with reception by default.
+    assert doctor.post(
+        "/api/appointments/", {"patient_id": patient["id"], "scheduled_at": later()}
+    ).status_code == 403
+
+
+def test_doctor_registers_patient_assigned_to_themself(smile, login):
+    """CR-021: a doctor may register a patient; it is assigned to that doctor only."""
+    doctor = login(smile.doctor_a)
+    patient = register(doctor, "Doctor's Own Patient")
+    assert [d["id"] for d in patient["doctors"]] == [smile.doctor_a.id]
+    # The doctor cannot register a patient for another doctor.
+    response = doctor.post(
+        "/api/patients/",
+        {"full_name": "X", "phone": "0100000000", "doctor_ids": [smile.doctor_b.id]},
+    )
+    assert response.status_code == 400
+    # Reception assigned to the doctor sees the new patient; the other doctor does not.
+    listed = login(smile.receptionist).get("/api/patients/").json()["results"]
+    assert patient["id"] in {p["id"] for p in listed}
+    assert login(smile.doctor_b).get(f"/api/patients/{patient['id']}/").status_code == 404
 
 
 def test_other_doctor_cannot_access_patient_or_visit(smile, login):

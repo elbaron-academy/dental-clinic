@@ -1,13 +1,14 @@
 # Change Requests and Implementation Decisions
 
-The business logic in `business-logic/` is the source of truth and has **not**
-been modified. Where it is silent, the BA raised a change request (CR). The
+The business logic in `business-logic/` is the source of truth. It has only
+been modified by product-owner decisions (marked `PO-APPROVED`). Where it is silent, the BA raised a change request (CR). The
 Team Leader approved each one as a conservative *implementation default* so
 the MVP could be delivered. Every CR still needs **product-owner
 confirmation**. If the product owner decides differently, the change stays
 small and local. The "Where" column shows the code to change (paths are under `backend/`).
 
 Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
+`PO-APPROVED` (decided by the product owner; `business-logic/` updated) ·
 `OPEN` (not implemented, needs a decision).
 
 | CR | Topic | Business logic gap | Implemented default | Where | Status |
@@ -32,6 +33,7 @@ Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
 | CR-018 | Catalog scope | Not defined | Procedures and medications are either global (no clinic) or specific to one clinic. | `apps/catalog/models.py` | TL-APPROVED DEFAULT |
 | CR-019 | API session model | Not defined | DRF token authentication. The token lasts until logout. Login is rate-limited (default 10/min per client). | `config/settings.py` | TL-APPROVED DEFAULT |
 | CR-020 | Time zone for "today" | Not defined | Timestamps are stored in UTC. Clients send their local day as `scheduled_from`/`scheduled_to`, and the server `TIME_ZONE` is configurable. | `apps/appointments/filters.py` | TL-APPROVED DEFAULT |
+| CR-021 | Doctors register patients | Patient registration was a receptionist duty only | **Product owner decision (2026-09-26):** every doctor can register patients by default (`patients.add_patient` in the Doctor role). The patient is assigned to the registering doctor, the only doctor they are permitted for. Editing patients and booking appointments stay with reception. `business-logic/users-and-roles.md` is updated. | `apps/accounts/roles.py` | PO-APPROVED |
 
 ## Permission matrix
 
@@ -42,7 +44,7 @@ and permitted-doctor scoping, and ownership of the active visit.
 | Capability | Permission codename | Doctor | Assistant | Receptionist |
 |---|---|:-:|:-:|:-:|
 | View patients | `patients.view_patient` | ✓ | ✓ | ✓ |
-| Register patient | `patients.add_patient` | | | ✓ |
+| Register patient (CR-021) | `patients.add_patient` | ✓ | | ✓ |
 | Edit patient | `patients.change_patient` | | | ✓ |
 | View appointments / queue | `appointments.view_appointment` | ✓ | ✓ | ✓ |
 | Create appointment | `appointments.add_appointment` | | | ✓ |

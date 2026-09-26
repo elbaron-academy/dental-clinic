@@ -34,7 +34,7 @@ def test_role_grants_default_permissions_without_group_membership(clinic, role):
 EXPECTED = {
     # permission: (doctor, assistant, receptionist)
     "patients.view_patient": (True, True, True),
-    "patients.add_patient": (False, False, True),
+    "patients.add_patient": (True, False, True),  # CR-021
     "patients.change_patient": (False, False, True),
     "appointments.view_appointment": (True, True, True),
     "appointments.add_appointment": (False, False, True),

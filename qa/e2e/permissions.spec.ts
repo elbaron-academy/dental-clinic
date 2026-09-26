@@ -56,10 +56,12 @@ test.describe('Permissions', () => {
     await expect(page.getByRole('heading', { name: 'Not available' })).toBeVisible()
   })
 
-  test('doctor sees no reception or payment tools', async ({ page, request }) => {
+  test('doctor can register patients but has no other reception or payment tools', async ({ page, request }) => {
     const { appointment } = await waitingPatientOfAmal(request)
     await loginAs(page, USERS.amal)
-    await expect(page.getByRole('link', { name: 'Register patient' })).toHaveCount(0)
+    // CR-021: doctors register patients; appointments stay with reception.
+    await expect(page.getByRole('link', { name: 'Register patient' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'New appointment' })).toHaveCount(0)
     await page.goto(`/appointments/${appointment.id}`)
     await expect(page.getByRole('button', { name: 'Check in' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Cancel appointment' })).toHaveCount(0)

@@ -36,7 +36,7 @@ Each domain is a Django app in `backend/apps/`:
 |---|---|---|
 | `core` | — | Shared plumbing: permissions (`IsClinicMember`, `ActionPermission`), row scoping (`scoping.py`), phone normalisation, error format, pagination, health, `seed_demo` |
 | `clinics` | `Clinic` | Clinic with one or many doctors |
-| `accounts` | `User`, `Role` | Phone-number login, role, clinic, staff→doctor assignment, role groups and default permissions (`roles.py`), auth backend |
+| `accounts` | `User`, `Role`, `Doctor` (proxy) | Phone-number login, role, clinic, staff→doctor assignment, role groups and default permissions (`roles.py`), auth backend. `Doctor` is a proxy of `User` that gives doctors their own Django Admin page. |
 | `patients` | `Patient` | Registration, minor/guardian rules, doctor association |
 | `catalog` | `Procedure`, `Medication` | Clinical catalog managed in Django Admin (global or per clinic) |
 | `appointments` | `Appointment` | Booking, check-in, cancel, queue, amount due |

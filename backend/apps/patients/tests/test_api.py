@@ -157,22 +157,31 @@ class TestScopingAndPermissions:
         response = client_for(assistant).get(URL)
         assert [p["id"] for p in response.json()["results"]] == [patient.id]
 
-    @pytest.mark.parametrize("role_fixture", ["doctor", "assistant"])
-    def test_only_reception_registers_by_default(self, request, client_for, role_fixture):
-        user = request.getfixturevalue(role_fixture)
-        assert register(client_for(user)).status_code == 403
+    def test_assistant_cannot_register_by_default(self, client_for, assistant):
+        assert register(client_for(assistant)).status_code == 403
+
+    def test_doctor_registers_own_patient(self, client_for, doctor, second_doctor):
+        """CR-021: doctors register patients; the patient is assigned to them."""
+        response = register(client_for(doctor))
+        assert response.status_code == 201
+        assert [d["id"] for d in response.json()["doctors"]] == [doctor.id]
+
+    def test_doctor_cannot_register_for_another_doctor(self, client_for, doctor, second_doctor):
+        response = register(client_for(doctor), doctor_ids=[second_doctor.id])
+        assert response.status_code == 400
+        assert "doctor_ids" in response.json()
 
     def test_doctor_cannot_edit_patient(self, client_for, clinic, doctor):
         patient = make_patient(clinic, [doctor])
         response = client_for(doctor).patch(f"{URL}{patient.id}/", {"address": "x"})
         assert response.status_code == 403
 
-    def test_extra_permission_can_be_granted(self, client_for, doctor):
+    def test_extra_permission_can_be_granted(self, client_for, assistant):
         """AUTH-002: permissions, not only roles, determine access."""
         from django.contrib.auth.models import Permission
 
-        doctor.user_permissions.add(Permission.objects.get(codename="add_patient"))
-        assert register(client_for(doctor)).status_code == 201
+        assistant.user_permissions.add(Permission.objects.get(codename="add_patient"))
+        assert register(client_for(assistant)).status_code == 201
 
     def test_anonymous_is_rejected(self, api_client, db):
         assert api_client.get(URL).status_code == 401

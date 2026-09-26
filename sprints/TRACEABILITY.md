@@ -36,6 +36,7 @@ exception: it is written but, by design, not verified.**
 | ROLE-002 | Assistant: accesses patients/doctors permitted by their assignment | users-and-roles.md | 02, 03 | BE `accounts/tests/test_permissions.py`, `patients/tests/test_api.py`; API-QA `test_permissions.py`; E2E `permissions.spec.ts` |
 | ROLE-003 | Receptionist: patient registration, appointments/check-in, queue state and payment recording, according to permissions | users-and-roles.md | 02, 03, 04, 06 | BE `accounts/tests/test_permissions.py`; API-QA `test_permissions.py`; E2E `reception.spec.ts` |
 | ROLE-004 | All access is scoped to the user's clinic and permitted doctors | users-and-roles.md, patients.md | 02–06 | BE scoping tests in every app; API-QA `test_permissions.py::test_cross_clinic_*`; E2E `permissions.spec.ts` |
+| ROLE-005 | Doctor can register patients; the patient is assigned to that doctor (CR-021) | users-and-roles.md | 08 | BE `accounts/tests/test_permissions.py::test_permission_matrix`, `patients/tests/test_api.py::test_doctor_registers_own_patient`, `::test_doctor_cannot_register_for_another_doctor`; API-QA `test_permissions.py::test_doctor_registers_patient_assigned_to_themself`, `test_auth.py`; E2E `doctor.spec.ts` (doctor registers a patient), `permissions.spec.ts` |
 
 ## Patients
 
@@ -107,6 +108,9 @@ exception: it is written but, by design, not verified.**
 | FND-006 | Documented API contract for client agents | skills/backend | 01–06 | `docs/API.md`, `docs/api/openapi.yaml`, BE `core/tests/test_schema.py` |
 | QA-001 | Automated tests first, then Web and PWA testing, regression, permissions and lifecycle acceptance | sprint-07, skills/qa | 07 | `qa/reports/QA_REPORT.md` |
 | QA-002 | Flutter runtime testing disabled for the MVP | sprint-07, skills/flutter | 07 | Not executed by design |
+| ADMIN-001 | Doctors have their own Django Admin page (`accounts.Doctor` proxy) | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_doctor_page_*`, `::test_admin_pages_load` |
+| ADMIN-002 | Django Admin uses the django-jazzmin theme | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_admin_pages_load` |
+| OPS-001 | Deployment to the production VM (nginx, gunicorn/systemd, HTTPS) | product owner, 2026-09-26 | 08 | `DEPLOY_TODO.md`, `deploy-details.txt`; health check in `backend/deploy/deploy.sh` and `web/deploy/deploy.sh` |
 
 ## Coverage check
 

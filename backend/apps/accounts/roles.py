@@ -24,6 +24,7 @@ ROLE_GROUP_NAMES: dict[str, str] = {
 DEFAULT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     Role.DOCTOR: (
         "patients.view_patient",
+        "patients.add_patient",  # CR-021
         "appointments.view_appointment",
         "visits.start_visit",
         "visits.view_visit",

@@ -1,6 +1,6 @@
 """CLINIC-001: clinics, doctors and staff are set up in Django Admin."""
 
-from apps.accounts.models import Role, User
+from apps.accounts.models import Doctor, Role, User
 from apps.core import testing
 
 
@@ -12,6 +12,9 @@ def test_admin_pages_load(admin_site_client, clinic, doctor):
         f"/admin/accounts/user/{doctor.pk}/change/",
         "/admin/clinics/clinic/",
         "/admin/clinics/clinic/add/",
+        "/admin/accounts/doctor/",
+        "/admin/accounts/doctor/add/",
+        f"/admin/accounts/doctor/{doctor.pk}/change/",
     ]:
         assert admin_site_client.get(url).status_code == 200, url
 
@@ -79,3 +82,44 @@ def test_admin_rejects_doctor_assignment_for_doctors(admin_site_client, clinic, 
     )
     assert response.status_code == 200
     assert "assigned_doctors" in response.context["adminform"].form.errors
+
+
+# Doctors have their own admin page (accounts.Doctor proxy).
+
+
+def test_doctor_page_lists_only_doctors(admin_site_client, clinic, doctor, receptionist):
+    response = admin_site_client.get("/admin/accounts/doctor/")
+    assert list(response.context["cl"].queryset) == [doctor]
+
+
+def test_doctor_page_creates_a_doctor(admin_site_client, clinic):
+    response = admin_site_client.post(
+        "/admin/accounts/doctor/add/",
+        {
+            "phone": "010 5555 0100",
+            "full_name": "Dr. New",
+            "clinic": clinic.pk,
+            "password1": "Clinic-pass-2024",
+            "password2": "Clinic-pass-2024",
+        },
+    )
+    assert response.status_code == 302, response.context["adminform"].form.errors
+    user = User.objects.get(phone="01055550100")
+    assert user.role == Role.DOCTOR
+    assert user.clinic == clinic
+    assert Doctor.objects.filter(pk=user.pk).exists()
+
+
+def test_doctor_page_requires_clinic(admin_site_client, db):
+    response = admin_site_client.post(
+        "/admin/accounts/doctor/add/",
+        {
+            "phone": "01055550101",
+            "full_name": "Dr. Nowhere",
+            "password1": "Clinic-pass-2024",
+            "password2": "Clinic-pass-2024",
+        },
+    )
+    assert response.status_code == 200
+    assert "clinic" in response.context["adminform"].form.errors
+    assert not User.objects.filter(phone="01055550101").exists()

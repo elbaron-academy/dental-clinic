@@ -1,6 +1,7 @@
 Django>=5.2,<5.3
 djangorestframework>=3.16,<3.19
 drf-spectacular>=0.28,<0.30
+django-jazzmin>=3.0,<4
 django-cors-headers>=4.6,<5
 dj-database-url>=2.3,<4
 psycopg[binary]>=3.2,<4

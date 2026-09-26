@@ -98,4 +98,18 @@ test.describe('Doctor visit', () => {
     await page.goto(`/visits/${started.visit_id}`)
     await expect(page.getByRole('alert')).toHaveText('Not found.')
   })
+
+  test('doctor registers a patient, who is assigned to them automatically (CR-021)', async ({ page }) => {
+    const name = uniqueName('DoctorReg')
+    await loginAs(page, USERS.amal)
+    await page.getByRole('link', { name: 'Register patient' }).click()
+    await expect(page.getByTestId('auto-doctor')).toContainText(USERS.amal.name)
+    await page.getByLabel(/Full name/).fill(name)
+    await page.getByLabel(/Phone number/).fill('0100 222 3333')
+    await page.getByRole('button', { name: 'Register patient' }).click()
+
+    await expect(page.getByRole('heading', { name })).toBeVisible()
+    await expect(page.getByText('Patient saved.')).toBeVisible()
+    await expect(page.locator('dt:has-text("Doctors") + dd')).toHaveText(USERS.amal.name)
+  })
 })
