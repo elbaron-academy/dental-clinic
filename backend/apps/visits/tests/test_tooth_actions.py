@@ -71,9 +71,72 @@ class TestActionTypes:
     def test_list_requires_authentication(self, api_client, db):
         assert api_client.get("/api/catalog/dental-actions/").status_code == 401
 
-    def test_list_is_read_only(self, client_for, doctor):
-        response = client_for(doctor).post("/api/catalog/dental-actions/", {"name": "X"})
-        assert response.status_code == 405
+    def test_only_doctors_add_action_types(self, client_for, assistant, receptionist):
+        """CR-024."""
+        for user in (assistant, receptionist):
+            response = client_for(user).post(
+                "/api/catalog/dental-actions/", {"name": "Veneer", "color": "#DB2777"}
+            )
+            assert response.status_code == 403
+        assert not DentalActionType.objects.filter(name="Veneer").exists()
+
+
+class TestDoctorAddsActionTypes:
+    """CHART-006 (CR-024): the doctor adds a new action while charting."""
+
+    URL = "/api/catalog/dental-actions/"
+
+    def test_doctor_adds_action_for_own_clinic(self, client_for, clinic, doctor):
+        response = client_for(doctor).post(
+            self.URL, {"name": "  Veneer ", "code": "D2962", "color": "#db2777"}
+        )
+        assert response.status_code == 201, response.content
+        body = response.json()
+        assert body["name"] == "Veneer"
+        assert body["color"] == "#DB2777"
+        created = DentalActionType.objects.get(pk=body["id"])
+        assert created.clinic == clinic
+        assert created.is_active
+        assert "Veneer" in [t["name"] for t in client_for(doctor).get(self.URL).json()]
+
+    def test_new_action_is_shared_within_the_clinic_only(
+        self, client_for, clinic, other_clinic, doctor, assistant
+    ):
+        client_for(doctor).post(self.URL, {"name": "Veneer", "color": "#DB2777"})
+        assert "Veneer" in [t["name"] for t in client_for(assistant).get(self.URL).json()]
+        stranger = testing.make_doctor(other_clinic)
+        assert "Veneer" not in [t["name"] for t in client_for(stranger).get(self.URL).json()]
+        # The other clinic may create its own action with the same name.
+        response = client_for(stranger).post(self.URL, {"name": "Veneer", "color": "#000000"})
+        assert response.status_code == 201
+
+    def test_color_defaults_and_is_validated(self, client_for, doctor):
+        client = client_for(doctor)
+        assert client.post(self.URL, {"name": "Sealant"}).json()["color"] == "#2563EB"
+        for bad in ("blue", "#12345", "#GGGGGG", "123456"):
+            response = client.post(self.URL, {"name": f"Bad {bad}", "color": bad})
+            assert response.status_code == 400
+            assert "color" in response.json()
+
+    @pytest.mark.parametrize("name", ["Filling", "filling", " FILLING "])
+    def test_duplicate_names_rejected(self, client_for, doctor, name):
+        response = client_for(doctor).post(self.URL, {"name": name, "color": "#000000"})
+        assert response.status_code == 400
+        assert response.json()["name"] == ["An action with this name already exists."]
+
+    def test_name_required(self, client_for, doctor):
+        response = client_for(doctor).post(self.URL, {"name": "  ", "color": "#000000"})
+        assert response.status_code == 400
+        assert "name" in response.json()
+
+    def test_new_action_can_be_marked_on_a_tooth(self, client_for, doctor, visit):
+        client = client_for(doctor)
+        veneer = client.post(self.URL, {"name": "Veneer", "color": "#DB2777"}).json()
+        response = client.post(
+            f"{URL}{visit.id}/tooth-actions/", {"tooth": "11", "action_type_id": veneer["id"]}
+        )
+        assert response.status_code == 201
+        assert response.json()["tooth_actions"][0]["action_type"] == veneer
 
     def test_admin_manages_action_types(self, admin_site_client):
         response = admin_site_client.post(

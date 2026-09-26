@@ -1,6 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 
-from apps.core.permissions import IsClinicMember
+from apps.core.permissions import ActionPermission, IsClinicMember
 
 from .models import DentalActionType, Medication, Procedure
 from .serializers import DentalActionTypeSerializer, MedicationSerializer, ProcedureSerializer
@@ -34,11 +34,24 @@ class MedicationViewSet(viewsets.ReadOnlyModelViewSet):
         return Medication.objects.available_to(self.request.user.clinic_id)
 
 
-class DentalActionTypeViewSet(viewsets.ReadOnlyModelViewSet):
-    """Active dental chart actions available to the user's clinic, with colors (CHART-001)."""
+class DentalActionTypeViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Active dental chart actions available to the user's clinic, with colors (CHART-001).
+
+    Doctors can add actions for their own clinic while charting (CHART-006, CR-024).
+    """
 
     serializer_class = DentalActionTypeSerializer
-    permission_classes = [IsClinicMember]
+    permission_classes = [IsClinicMember, ActionPermission]
+    action_permissions = {
+        "list": (),
+        "retrieve": (),
+        "create": ("catalog.add_dentalactiontype",),
+    }
     pagination_class = None
     search_fields = ["name", "code"]
 
@@ -46,3 +59,6 @@ class DentalActionTypeViewSet(viewsets.ReadOnlyModelViewSet):
         if getattr(self, "swagger_fake_view", False):  # OpenAPI generation
             return DentalActionType.objects.none()
         return DentalActionType.objects.available_to(self.request.user.clinic_id)
+
+    def perform_create(self, serializer):
+        serializer.save(clinic_id=self.request.user.clinic_id)

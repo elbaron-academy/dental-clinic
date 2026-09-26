@@ -2,8 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import * as api from '../../api/endpoints'
+import { useAuth } from '../../auth/context'
 import type { CatalogMedication, CatalogProcedure, Visit } from '../../api/types'
-import { DentalChart } from '../../components/DentalChart'
+import { DentalChart, type NewActionInput } from '../../components/DentalChart'
 import { Card, EmptyState, ErrorAlert, Field, Loading, PageHeader, StatusBadge, SuccessAlert } from '../../components/ui'
 import { VisitDetails } from '../../components/VisitDetails'
 import { dateTimeInputToIso, formatDateTime, toDateTimeInput } from '../../lib/format'
@@ -61,6 +62,14 @@ function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visi
   const procedures = useAsync(() => api.listProcedures(), [])
   const medications = useAsync(() => api.listMedications(), [])
   const dentalActions = useAsync(() => api.listDentalActionTypes(), [])
+  const { hasPerm } = useAuth()
+
+  /** The doctor adds a new action while charting; it joins the picker (CHART-006). */
+  async function createActionType(input: NewActionInput) {
+    const created = await api.createDentalActionType(input)
+    dentalActions.setData([...(dentalActions.data ?? []), created].sort((a, b) => a.name.localeCompare(b.name)))
+    return created
+  }
   const [notes, setNotes] = useState({ notes: visit.notes, diagnosis: visit.diagnosis, treatment: visit.treatment })
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -132,7 +141,12 @@ function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visi
       </Card>
       <Card title="Dental chart">
         <ErrorAlert error={dentalActions.error} onRetry={dentalActions.reload} />
-        <DentalChart visit={visit} actionTypes={dentalActions.data ?? []} onChange={onChange} />
+        <DentalChart
+          visit={visit}
+          actionTypes={dentalActions.data ?? []}
+          onChange={onChange}
+          onCreateType={hasPerm('catalog.add_dentalactiontype') ? createActionType : undefined}
+        />
       </Card>
       <div className="grid-2">
         <ProceduresCard visit={visit} catalog={procedures.data ?? []} onChange={onChange} />

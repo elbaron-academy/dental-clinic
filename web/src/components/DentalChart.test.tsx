@@ -115,4 +115,45 @@ describe('dental chart (CHART-001..004)', () => {
     render(<DentalChart visit={makeVisit({ can_edit: false })} />)
     expect(screen.getByText('No teeth marked in this visit.')).toBeInTheDocument()
   })
+
+  it('lets the doctor add a new action and marks it on the tooth (CHART-006)', async () => {
+    const visit = makeVisit()
+    const veneer: DentalActionType = { id: 7, name: 'Veneer', code: '', color: '#DB2777' }
+    const marked = { ...visit, tooth_actions: [action(11, '21', veneer)] }
+    const { calls } = mockApi({ 'POST /api/visits/3/tooth-actions/': () => ({ status: 201, body: marked }) })
+    const onCreateType = vi.fn(async () => veneer)
+    const onChange = vi.fn()
+    render(<DentalChart visit={visit} actionTypes={TYPES} onChange={onChange} onCreateType={onCreateType} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Tooth 21: no actions' }))
+    await userEvent.click(screen.getByRole('button', { name: '+ New action' }))
+    const form = screen.getByRole('form', { name: 'New action' })
+    expect(within(form).getByRole('button', { name: 'Add to tooth 21' })).toBeDisabled()
+    // The first suggested color that no action uses yet.
+    expect(within(form).getByLabelText('Color')).toHaveValue('#db2777')
+    await userEvent.type(within(form).getByLabelText(/New action name/), ' Veneer ')
+    await userEvent.click(within(form).getByRole('button', { name: 'Add to tooth 21' }))
+    expect(onCreateType).toHaveBeenCalledWith({ name: 'Veneer', color: '#DB2777' })
+    expect(calls.at(-1)?.body).toEqual({ tooth: '21', action_type_id: 7, notes: '' })
+    expect(onChange).toHaveBeenCalledWith(marked)
+    expect(screen.queryByRole('form', { name: 'New action' })).not.toBeInTheDocument()
+  })
+
+  it('shows why a new action was refused', async () => {
+    const { ApiError } = await import('../api/client')
+    const onCreateType = vi.fn(async () => {
+      throw new ApiError(400, 'Please correct the highlighted fields.', undefined, { name: ['An action with this name already exists.'] })
+    })
+    render(<DentalChart visit={makeVisit()} actionTypes={TYPES} onChange={vi.fn()} onCreateType={onCreateType} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Tooth 21: no actions' }))
+    await userEvent.click(screen.getByRole('button', { name: '+ New action' }))
+    await userEvent.type(screen.getByLabelText(/New action name/), 'Filling')
+    await userEvent.click(screen.getByRole('button', { name: 'Add to tooth 21' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('An action with this name already exists.')
+  })
+
+  it('has no New action button without the permission', async () => {
+    render(<DentalChart visit={makeVisit()} actionTypes={TYPES} onChange={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Tooth 21: no actions' }))
+    expect(screen.queryByRole('button', { name: '+ New action' })).not.toBeInTheDocument()
+  })
 })

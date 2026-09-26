@@ -24,6 +24,7 @@ BACKLOG -> IN_PROGRESS -> READY_FOR_REVIEW -> CHANGES_REQUESTED/APPROVED -> READ
 | [08](sprint-08-doctor-registration-admin-deploy.md) | Doctor registers patients, Doctors admin page, admin theme, production deploy | READY_FOR_QA (CI) |
 | [09](sprint-09-doctor-booking-version-cd.md) | Doctor books appointments, app version, continuous deployment | READY_FOR_QA (CI) |
 | [10](sprint-10-dental-chart.md) | Dental chart: action types, per-visit tooth actions, chart UI | QA_PASSED (server) |
+| [11](sprint-11-chart-actions-patient-chart.md) | Doctors add dental actions, patient-page chart, visible version | QA_PASSED (server) |
 
 Requirement IDs and verification: [TRACEABILITY.md](TRACEABILITY.md).
 Gaps and approved defaults: [../docs/DECISIONS.md](../docs/DECISIONS.md).

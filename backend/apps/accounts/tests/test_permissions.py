@@ -44,6 +44,7 @@ EXPECTED = {
     "visits.view_visit": (True, True, False),
     "visits.record_visit": (True, False, False),
     "visits.complete_visit": (True, False, False),
+    "catalog.add_dentalactiontype": (True, False, False),  # CR-024
     "payments.view_payment": (False, False, True),
     "payments.add_payment": (False, False, True),
     "payments.manage_billing": (False, False, True),

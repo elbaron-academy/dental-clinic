@@ -108,3 +108,22 @@ Regression note: `doctor.spec.ts` now finds the procedure's tooth field with an
 exact label, because the chart's tooth buttons are also named "Tooth …". No
 product defects were found.
 
+## 8. Sprint 11 — Doctors add dental actions, patient chart, version (2026-09-27)
+
+Run on the production VM in `~/dental-qa` (own database and ports; production untouched).
+
+| Suite | Result |
+|---|---|
+| Backend lint, migrations check | ✅ clean, no changes |
+| Backend tests (SQLite) | ✅ **260 passed** |
+| API contract | ✅ regenerated, no warnings |
+| QA API acceptance | ✅ **47 passed** (2 new) |
+| Web lint / types / unit | ✅ clean, **58 passed** |
+| Web + PWA e2e (Chromium) | ✅ **45 passed**, 0 flaky (3 new) |
+
+| Area | IDs | API acceptance | E2E | Result |
+|---|---|---|---|---|
+| Doctor adds an action, marks it, clinic sharing, duplicates, role check | CHART-006 | `test_dental_chart.py::test_doctor_adds_a_new_action_and_marks_it`, `::test_only_doctors_add_actions` | `dental-chart.spec.ts::doctor adds a new action…` | ✅ |
+| Patient-page chart | CHART-007 | — | `dental-chart.spec.ts::patient page shows the dental chart…` | ✅ |
+| Version in the top bar | OPS-002 | — | `dental-chart.spec.ts::the app version is shown in the top bar` | ✅ |
+

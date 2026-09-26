@@ -104,6 +104,7 @@ return `403`; writes to a completed visit return `409 visit_completed`.
 | GET | `/api/catalog/procedures/?search=` | any clinic user | active items for the clinic |
 | GET | `/api/catalog/medications/?search=` | any clinic user | active items for the clinic |
 | GET | `/api/catalog/dental-actions/?search=` | any clinic user | active dental chart actions `{id, name, code, color}` for the clinic (CR-023) |
+| POST | `/api/catalog/dental-actions/` | `catalog.add_dentalactiontype` (doctors) | `{name*, color? (#RRGGBB, default #2563EB), code?}` creates an action for the user's clinic (CR-024). `400` on `name` if it repeats an existing action (ignoring case). |
 
 ## Payments (Sprint 06)
 

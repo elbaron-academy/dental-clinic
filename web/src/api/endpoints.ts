@@ -90,6 +90,8 @@ export const listMedications = () => apiRequest<CatalogMedication[]>('/catalog/m
 
 // Dental chart (CHART-001..004)
 export const listDentalActionTypes = () => apiRequest<DentalActionType[]>('/catalog/dental-actions/')
+export const createDentalActionType = (input: { name: string; color: string; code?: string }) =>
+  apiRequest<DentalActionType>('/catalog/dental-actions/', { method: 'POST', body: input })
 export const addToothAction = (id: number, input: { tooth: string; action_type_id: number; notes?: string }) =>
   apiRequest<Visit>(`/visits/${id}/tooth-actions/`, { method: 'POST', body: input })
 export const removeToothAction = (id: number, entryId: number) =>

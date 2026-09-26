@@ -166,3 +166,37 @@ def test_charts_of_two_patients_do_not_mix(smile, login):
     visit_two = active_visit(reception, two["id"], smile.doctor_a.id)
     mark(doctor, visit_one, "21", ids["Caries"])
     assert doctor.get(f"/api/visits/{visit_two}/").json()["tooth_actions"] == []
+
+
+# --- Doctor adds actions (CHART-006, CR-024) ----------------------------------
+
+
+def test_doctor_adds_a_new_action_and_marks_it(smile, other, login):
+    reception = login(smile.receptionist)
+    doctor = login(smile.doctor_a)
+    patient = register(reception, doctor_ids=[smile.doctor_a.id])
+    visit_id = active_visit(reception, patient["id"], smile.doctor_a.id)
+
+    created = doctor.post(ACTIONS, {"name": "Veneer", "color": "#db2777"})
+    assert created.status_code == 201, created.content
+    veneer = created.json()
+    assert veneer["color"] == "#DB2777"
+    marked = mark(doctor, visit_id, "21", veneer["id"])
+    assert marked.status_code == 201
+    assert marked.json()["tooth_actions"][0]["action_type"]["name"] == "Veneer"
+
+    # Shared with the clinic (the other doctor, the assistant), not with other clinics.
+    assert "Veneer" in action_ids(login(smile.doctor_b))
+    assert "Veneer" in action_ids(login(smile.assistant))
+    assert "Veneer" not in action_ids(login(other.doctor_a))
+
+    # No duplicates of an existing action (case-insensitive); color must be hex.
+    assert doctor.post(ACTIONS, {"name": "veneer", "color": "#000000"}).status_code == 400
+    assert doctor.post(ACTIONS, {"name": "Filling", "color": "#000000"}).status_code == 400
+    assert doctor.post(ACTIONS, {"name": "Sealant", "color": "green"}).status_code == 400
+
+
+def test_only_doctors_add_actions(smile, login):
+    for user in (smile.assistant, smile.receptionist):
+        response = login(user).post(ACTIONS, {"name": "Nope", "color": "#000000"})
+        assert response.status_code == 403

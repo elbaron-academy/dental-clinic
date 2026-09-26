@@ -990,6 +990,43 @@ button.tooth:focus-visible {
   margin: 0;
 }
 
+.action-chip-new {
+  border-style: dashed;
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+.new-action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: flex-end;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.75rem;
+}
+
+.new-action .field:first-child {
+  flex: 1 1 200px;
+}
+
+.new-action input[type='color'] {
+  width: 56px;
+  height: 40px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.new-action-buttons {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.chart-visit-select {
+  max-width: 420px;
+  margin-bottom: 0.75rem;
+}
+
 @media (max-width: 640px) {
   .chart-row {
     grid-template-columns: 1fr;

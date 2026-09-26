@@ -377,8 +377,10 @@ paths:
   /api/catalog/dental-actions/:
     get:
       operationId: catalog_dental_actions_list
-      description: Active dental chart actions available to the user's clinic, with
-        colors (CHART-001).
+      description: |-
+        Active dental chart actions available to the user's clinic, with colors (CHART-001).
+
+        Doctors can add actions for their own clinic while charting (CHART-006, CR-024).
       parameters:
       - name: ordering
         required: false
@@ -406,11 +408,43 @@ paths:
                 items:
                   $ref: '#/components/schemas/DentalActionType'
           description: ''
+    post:
+      operationId: catalog_dental_actions_create
+      description: |-
+        Active dental chart actions available to the user's clinic, with colors (CHART-001).
+
+        Doctors can add actions for their own clinic while charting (CHART-006, CR-024).
+      tags:
+      - catalog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DentalActionTypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DentalActionTypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DentalActionTypeRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DentalActionType'
+          description: ''
   /api/catalog/dental-actions/{id}/:
     get:
       operationId: catalog_dental_actions_retrieve
-      description: Active dental chart actions available to the user's clinic, with
-        colors (CHART-001).
+      description: |-
+        Active dental chart actions available to the user's clinic, with colors (CHART-001).
+
+        Doctors can add actions for their own clinic while charting (CHART-006, CR-024).
       parameters:
       - in: path
         name: id

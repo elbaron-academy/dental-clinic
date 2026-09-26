@@ -16,6 +16,20 @@ class DentalActionTypeSerializer(serializers.ModelSerializer):
         model = DentalActionType
         fields = ["id", "name", "code", "color"]
 
+    def validate_name(self, value):
+        """A doctor-created action must not duplicate one the clinic already has (CR-024)."""
+        name = value.strip()
+        if not name:
+            raise serializers.ValidationError("Enter a name.")
+        request = self.context.get("request")
+        clinic_id = request.user.clinic_id if request else None
+        if DentalActionType.objects.available_to(clinic_id).filter(name__iexact=name).exists():
+            raise serializers.ValidationError("An action with this name already exists.")
+        return name
+
+    def validate_color(self, value):
+        return value.upper()
+
 
 class MedicationSerializer(serializers.ModelSerializer):
     class Meta:

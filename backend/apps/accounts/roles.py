@@ -31,6 +31,7 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "visits.view_visit",
         "visits.record_visit",
         "visits.complete_visit",
+        "catalog.add_dentalactiontype",  # CR-024
     ),
     Role.ASSISTANT: (
         "patients.view_patient",

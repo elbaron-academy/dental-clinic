@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import * as api from '../../api/endpoints'
+import type { Visit } from '../../api/types'
 import { useAuth } from '../../auth/context'
+import { DentalChart } from '../../components/DentalChart'
 import { Card, EmptyState, ErrorAlert, Loading, PageHeader, PaymentBadge, StatusBadge, SuccessAlert } from '../../components/ui'
 import { VisitDetails } from '../../components/VisitDetails'
 import { formatDateTime, formatMoney } from '../../lib/format'
@@ -106,6 +109,8 @@ export function PatientDetail() {
         </ul>
       </Card>
 
+      {canSeeVisits && visits.data && <PatientChartCard visits={visits.data.results} />}
+
       {canSeeVisits && (
         <Card title="Visit history">
           <ErrorAlert error={visits.error} />
@@ -131,5 +136,50 @@ export function PatientDetail() {
         </Card>
       )}
     </>
+  )
+}
+
+/** The dental chart of one of the patient's visits, newest charted visit first (CHART-007). */
+function PatientChartCard({ visits }: { visits: Visit[] }) {
+  const charted = visits.filter((v) => v.tooth_actions.length > 0)
+  const [chosen, setChosen] = useState<number | null>(null)
+  const visit = charted.find((v) => v.id === chosen) ?? charted[0]
+
+  return (
+    <Card
+      title="Dental chart"
+      actions={
+        visit && (
+          <Link to={`/visits/${visit.id}`} className="btn btn-small btn-ghost">
+            {visit.can_edit ? 'Continue visit' : 'Open visit'}
+          </Link>
+        )
+      }
+    >
+      {!visit ? (
+        <EmptyState>No teeth charted yet. The doctor marks teeth on the dental chart of an active visit.</EmptyState>
+      ) : (
+        <>
+          {charted.length > 1 && (
+            <div className="field chart-visit-select">
+              <label htmlFor="chart_visit">Visit</label>
+              <select id="chart_visit" value={visit.id} onChange={(event) => setChosen(Number(event.target.value))}>
+                {charted.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {formatDateTime(v.started_at)} · {v.doctor.full_name} · {v.status_display}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {charted.length === 1 && (
+            <p className="muted">
+              Visit of {formatDateTime(visit.started_at)} with {visit.doctor.full_name}
+            </p>
+          )}
+          <DentalChart key={visit.id} visit={visit} />
+        </>
+      )}
+    </Card>
   )
 }

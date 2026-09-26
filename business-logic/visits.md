@@ -25,6 +25,11 @@ permanent 11–48, primary 51–85).
   shows a legend.
 - Dental action types and their colors are clinical catalog data managed in
   Django Admin. Inactive types stay in history but cannot be selected.
+- While charting, the doctor can add a new dental action (name and color).
+  It is marked on the selected tooth at once and becomes available to
+  everyone in the doctor's clinic. Names must not repeat an existing action.
+- The patient page shows the dental chart of the patient's charted visits,
+  one visit at a time.
 - Each visit has its own chart. Actions recorded in one visit do not appear
   on the chart of any other visit.
 - Staff who can view the visit see its chart read-only. Completed visits keep

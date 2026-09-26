@@ -37,7 +37,9 @@ export function Layout() {
             <Logo />
             <span>
               <strong>{user.clinic.name}</strong>
-              <small>Dental Clinic</small>
+              <small>
+                Dental Clinic · <span data-testid="topbar-version">v{__APP_VERSION__}</span>
+              </small>
             </span>
           </NavLink>
           <nav className="nav" aria-label="Main">

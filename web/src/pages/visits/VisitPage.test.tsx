@@ -8,7 +8,7 @@ import { VisitPage } from './VisitPage'
 const doctor = makeUser({
   id: 10,
   role: 'DOCTOR',
-  permissions: ['visits.view_visit', 'visits.record_visit', 'visits.complete_visit'],
+  permissions: ['visits.view_visit', 'visits.record_visit', 'visits.complete_visit', 'catalog.add_dentalactiontype'],
 })
 
 const FILLING = { id: 4, name: 'Filling', code: 'D2391', color: '#2563EB' }
@@ -103,5 +103,32 @@ describe('visit page (VISIT-001..007)', () => {
     expect(await screen.findByRole('img', { name: 'Tooth 26: Filling' })).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Tooth actions' })).toHaveTextContent('Filling')
     expect(screen.queryByRole('button', { name: /^Tooth / })).not.toBeInTheDocument()
+  })
+
+  it('the doctor creates a new action from the chart and it is marked on the tooth (CHART-006)', async () => {
+    const visit = makeVisit()
+    const veneer = { id: 9, name: 'Veneer', code: '', color: '#DB2777' }
+    const { calls } = mockApi({
+      'GET /api/visits/3/': () => ({ body: visit }),
+      'GET /api/catalog/procedures/': () => ({ body: [] }),
+      'GET /api/catalog/medications/': () => ({ body: [] }),
+      'GET /api/catalog/dental-actions/': () => ({ body: [FILLING] }),
+      'POST /api/catalog/dental-actions/': () => ({ status: 201, body: veneer }),
+      'POST /api/visits/3/tooth-actions/': () => ({
+        status: 201,
+        body: { ...visit, tooth_actions: [{ id: 8, tooth: '11', action_type: veneer, notes: '' }] },
+      }),
+    })
+    renderWithAuth(<VisitPage />, { user: doctor, path: '/visits/3', route: '/visits/:id' })
+    await userEvent.click(await screen.findByRole('button', { name: 'Tooth 11: no actions' }))
+    await userEvent.click(await screen.findByRole('button', { name: '+ New action' }))
+    await userEvent.type(screen.getByLabelText(/New action name/), 'Veneer')
+    await userEvent.click(screen.getByRole('button', { name: 'Add to tooth 11' }))
+    expect(await screen.findByRole('button', { name: 'Tooth 11: Veneer' })).toBeInTheDocument()
+    // The new action joins the picker and the legend.
+    expect(screen.getByRole('button', { name: 'Veneer' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('list', { name: 'Chart legend' })).toHaveTextContent('Veneer')
+    const posts = calls.filter((c) => c.method === 'POST').map((c) => c.path)
+    expect(posts).toEqual(['/api/catalog/dental-actions/', '/api/visits/3/tooth-actions/'])
   })
 })

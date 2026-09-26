@@ -136,4 +136,53 @@ test.describe('Dental chart', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     expect(overflow).toBeLessThanOrEqual(0)
   })
+
+  test('doctor adds a new action from the chart; it is marked and offered next time', async ({ page, request }) => {
+    const { visitId } = await startedVisit(request)
+    const name = `Veneer ${Date.now().toString(36)}`
+    await loginAs(page, USERS.amal)
+    await page.goto(`/visits/${visitId}`)
+    await tooth(page, '12').click()
+    await picker(page, '12').getByRole('button', { name: '+ New action' }).click()
+    const form = page.getByRole('form', { name: 'New action' })
+    await form.getByLabel(/New action name/).fill(name)
+    await form.getByLabel('Color').fill('#db2777')
+    await form.getByRole('button', { name: 'Add to tooth 12' }).click()
+    await expect(page.getByRole('button', { name: `Tooth 12: ${name}` })).toBeVisible()
+    await expect(tooth(page, '12')).toHaveCSS('background-color', 'rgb(219, 39, 119)')
+    await expect(page.getByRole('list', { name: 'Chart legend' })).toContainText(name)
+
+    // Offered on other teeth and after a reload; duplicates are refused.
+    await page.reload()
+    await tooth(page, '13').click()
+    await expect(picker(page, '13').getByRole('button', { name })).toBeVisible()
+    await picker(page, '13').getByRole('button', { name: '+ New action' }).click()
+    await page.getByLabel(/New action name/).fill(name.toLowerCase())
+    await page.getByRole('button', { name: 'Add to tooth 13' }).click()
+    await expect(picker(page, '13').getByRole('alert')).toContainText('already exists')
+  })
+
+  test('patient page shows the dental chart of the charted visits', async ({ page, request }) => {
+    const { visitId, patient } = await startedVisit(request)
+    await loginAs(page, USERS.amal)
+    await page.goto(`/patients/${patient.id}`)
+    await expect(page.getByText(/No teeth charted yet/)).toBeVisible()
+
+    await page.goto(`/visits/${visitId}`)
+    await tooth(page, '31').click()
+    await picker(page, '31').getByRole('button', { name: 'Caries' }).click()
+    await expect(page.getByRole('button', { name: 'Tooth 31: Caries' })).toBeVisible()
+
+    await page.getByRole('link', { name: 'Patient history' }).click()
+    const card = page.locator('section.card', { has: page.getByRole('heading', { name: 'Dental chart', level: 2 }) })
+    await expect(card.getByRole('img', { name: 'Tooth 31: Caries' })).toBeVisible()
+    await card.getByRole('link', { name: 'Continue visit' }).click()
+    await expect(page).toHaveURL(new RegExp(`/visits/${visitId}$`))
+  })
+
+  test('the app version is shown in the top bar', async ({ page }) => {
+    await loginAs(page, USERS.amal)
+    await expect(page.getByTestId('topbar-version')).toHaveText(/^v\d+\.\d+\.\d+$/)
+  })
 })
+
