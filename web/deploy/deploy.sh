@@ -182,8 +182,9 @@ chown -R "$APP_USER:$APP_USER" "$BUILD"
 
 log "Installing npm packages"
 (cd "$BUILD" && run_app npm ci --no-audit --no-fund --loglevel=error)
-log "Building (VITE_API_BASE_URL='${API_URL}')"
-(cd "$BUILD" && run_app env VITE_API_BASE_URL="$API_URL" npm run build)
+COMMIT="$(git -c safe.directory='*' -C "$SRC_DIR" rev-parse --short HEAD 2>/dev/null || true)"
+log "Building (VITE_API_BASE_URL='${API_URL}', commit ${COMMIT:-unknown})"
+(cd "$BUILD" && run_app env VITE_API_BASE_URL="$API_URL" VITE_APP_COMMIT="$COMMIT" npm run build)
 
 [[ -f "$BUILD/dist/index.html" && -f "$BUILD/dist/sw.js" ]] \
   || die "Build output is missing index.html or sw.js."

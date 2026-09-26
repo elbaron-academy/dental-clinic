@@ -3,6 +3,7 @@ import { useAuth, useUser } from '../auth/context'
 import { ROLES } from '../auth/roles'
 import { InstallButton } from './InstallButton'
 import { OfflineBanner } from './OfflineBanner'
+import { AppVersion } from './AppVersion'
 
 export function Logo() {
   return (
@@ -60,6 +61,9 @@ export function Layout() {
       <main className="container">
         <Outlet />
       </main>
+      <footer className="app-footer">
+        <AppVersion />
+      </footer>
     </div>
   )
 }

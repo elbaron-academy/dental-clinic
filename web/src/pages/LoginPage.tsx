@@ -5,6 +5,7 @@ import { useAuth } from '../auth/context'
 import { ROLES, roleBySlug } from '../auth/roles'
 import { Logo } from '../components/Layout'
 import { Field } from '../components/ui'
+import { AppVersion } from '../components/AppVersion'
 
 /**
  * Role-specific login pages (S02-PWA-01..03): Doctor, Assistant and
@@ -92,6 +93,7 @@ export function LoginPage() {
         <p className="auth-footer">
           Not a {info.label.toLowerCase()}? <Link to="/login">Choose another portal</Link>
         </p>
+        <AppVersion />
       </form>
     </div>
   )

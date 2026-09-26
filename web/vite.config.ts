@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import { readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -7,6 +8,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 // like production where /api and /admin are routed to Django.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  // Shown in the UI: the package version plus the git commit the server built from.
+  const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
   const target = env.VITE_PROXY_TARGET || 'http://127.0.0.1:8000'
   const proxy = {
     '/api': { target, changeOrigin: false },
@@ -15,6 +18,10 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+      __APP_COMMIT__: JSON.stringify(env.VITE_APP_COMMIT ?? ''),
+    },
     plugins: [
       react(),
       VitePWA({

@@ -2,6 +2,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import { ROLE_LIST, ROLES } from '../auth/roles'
 import { Logo } from '../components/Layout'
+import { AppVersion } from '../components/AppVersion'
 
 export function LoginChooser() {
   const { user } = useAuth()
@@ -24,6 +25,7 @@ export function LoginChooser() {
             </li>
           ))}
         </ul>
+        <AppVersion />
       </div>
     </div>
   )
