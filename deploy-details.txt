@@ -6,7 +6,7 @@ SERVER
 ------
 GCP project      : hossam-project-503909
 VM name / zone   : dental-clinic / us-central1-a (e2-medium: 2 vCPU, 4 GB, Ubuntu 24.04)
-External IP      : 34.123.215.195 (ephemeral - reserve it as static, see DEPLOY_TODO.md)
+External IP      : 34.123.215.195 (static: address "dental-clinic-ip", us-central1)
 SSH              : ssh dental            (alias in ~/.ssh/config -> hossam@34.123.215.195)
 Git checkout     : /srv/dental-clinic/repo   (branch claude/adoring-goldberg-ye6g4m, HTTPS clone)
 System user      : dental-clinic         (runs the backend, builds the frontend; no login)
@@ -65,6 +65,17 @@ Rollback         : sudo web/deploy/deploy.sh --domain dental.hossam-ameen.online
 Useful commands:
   sudo nginx -t && sudo systemctl reload nginx
   sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log
+
+AUTOMATED DEPLOY (GitHub Actions)
+---------------------------------
+Deploy user      : deploy  (SSH key only; can run nothing but the deploy command)
+Forced command   : /usr/local/sbin/dental-ci-deploy  (copy of scripts/ci-deploy-forced-command.sh;
+                   reinstall it by hand after changing that file)
+sudoers          : /etc/sudoers.d/dental-ci-deploy
+Key restriction  : /home/deploy/.ssh/authorized_keys  (command="sudo /usr/local/sbin/dental-ci-deploy",restrict)
+Private key      : ~/.ssh/dental_github_actions on Hossam's laptop -> repo secret DEPLOY_SSH_KEY
+Client sends     : ssh deploy@34.123.215.195 "deploy <40-char sha on the deploy branch>"
+Repo secrets     : DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS
 
 HTTPS
 -----
