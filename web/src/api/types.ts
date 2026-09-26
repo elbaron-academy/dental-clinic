@@ -113,6 +113,22 @@ export interface CatalogMedication {
   details: string
 }
 
+/** Dental chart action configured in Django Admin, with its chart color (CHART-001). */
+export interface DentalActionType {
+  id: number
+  name: string
+  code: string
+  color: string
+}
+
+/** One action on one tooth of a visit's dental chart (CHART-002). */
+export interface VisitToothAction {
+  id: number
+  tooth: string
+  action_type: DentalActionType
+  notes: string
+}
+
 export interface VisitProcedure {
   id: number
   procedure: CatalogProcedure | null
@@ -150,6 +166,7 @@ export interface Visit {
   diagnosis: string
   treatment: string
   procedures: VisitProcedure[]
+  tooth_actions: VisitToothAction[]
   medications: VisitMedication[]
   follow_ups: FollowUp[]
   can_edit: boolean

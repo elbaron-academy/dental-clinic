@@ -2,8 +2,8 @@ from rest_framework import viewsets
 
 from apps.core.permissions import IsClinicMember
 
-from .models import Medication, Procedure
-from .serializers import MedicationSerializer, ProcedureSerializer
+from .models import DentalActionType, Medication, Procedure
+from .serializers import DentalActionTypeSerializer, MedicationSerializer, ProcedureSerializer
 
 
 class ProcedureViewSet(viewsets.ReadOnlyModelViewSet):
@@ -32,3 +32,17 @@ class MedicationViewSet(viewsets.ReadOnlyModelViewSet):
         if getattr(self, "swagger_fake_view", False):  # OpenAPI generation
             return Medication.objects.none()
         return Medication.objects.available_to(self.request.user.clinic_id)
+
+
+class DentalActionTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """Active dental chart actions available to the user's clinic, with colors (CHART-001)."""
+
+    serializer_class = DentalActionTypeSerializer
+    permission_classes = [IsClinicMember]
+    pagination_class = None
+    search_fields = ["name", "code"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # OpenAPI generation
+            return DentalActionType.objects.none()
+        return DentalActionType.objects.available_to(self.request.user.clinic_id)

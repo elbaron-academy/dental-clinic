@@ -80,6 +80,7 @@ checked_in_at, cancelled_at, created_at}`
 `Visit` = `{id, status: ACTIVE|COMPLETED, status_display, patient, doctor,
 appointment, started_at, completed_at, notes, diagnosis, treatment,
 procedures: [{id, procedure: {id, name, code}|null, tooth, notes}],
+tooth_actions: [{id, tooth, action_type: {id, name, code, color}, notes}],
 medications: [{id, medication: {id, name, details}, quantity, duration}],
 follow_ups: [{id, scheduled_at, notes, status, status_display}], can_edit}`
 
@@ -94,12 +95,15 @@ return `403`; writes to a completed visit return `409 visit_completed`.
 | PATCH | `/api/visits/{id}/` | `visits.record_visit` + owner | `{notes?, diagnosis?, treatment?}` |
 | POST | `/api/visits/{id}/procedures/` | `visits.record_visit` + owner | `{procedure_id?, tooth?, notes?}`. Needs a procedure or notes. `tooth` uses FDI notation (11–48, 51–85). |
 | DELETE | `/api/visits/{id}/procedures/{entry_id}/` | same | |
+| POST | `/api/visits/{id}/tooth-actions/` | same | Dental chart (CR-023): `{tooth*, action_type_id*, notes?}`. FDI tooth. `400` on `action_type_id` if the tooth already has that action in this visit. |
+| DELETE | `/api/visits/{id}/tooth-actions/{entry_id}/` | same | only entries of this visit (`404` otherwise) |
 | POST | `/api/visits/{id}/medications/` | same | `{medication_id*, quantity*, duration*}` |
 | DELETE | `/api/visits/{id}/medications/{entry_id}/` | same | |
 | POST | `/api/visits/{id}/follow-ups/` | same | `{scheduled_at* (future), notes?}` creates a `SCHEDULED` appointment with the same doctor |
-| POST | `/api/visits/{id}/complete/` | `visits.complete_visit` + owner | `409 outcome_required` if nothing was recorded |
+| POST | `/api/visits/{id}/complete/` | `visits.complete_visit` + owner | `409 outcome_required` if nothing was recorded (notes, diagnosis, treatment, procedure or tooth action) |
 | GET | `/api/catalog/procedures/?search=` | any clinic user | active items for the clinic |
 | GET | `/api/catalog/medications/?search=` | any clinic user | active items for the clinic |
+| GET | `/api/catalog/dental-actions/?search=` | any clinic user | active dental chart actions `{id, name, code, color}` for the clinic (CR-023) |
 
 ## Payments (Sprint 06)
 

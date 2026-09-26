@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import * as api from '../../api/endpoints'
 import type { CatalogMedication, CatalogProcedure, Visit } from '../../api/types'
+import { DentalChart } from '../../components/DentalChart'
 import { Card, EmptyState, ErrorAlert, Field, Loading, PageHeader, StatusBadge, SuccessAlert } from '../../components/ui'
 import { VisitDetails } from '../../components/VisitDetails'
 import { dateTimeInputToIso, formatDateTime, toDateTimeInput } from '../../lib/format'
@@ -38,13 +39,18 @@ export function VisitPage() {
       {v.can_edit ? (
         <VisitEditor visit={v} onChange={visit.setData} />
       ) : (
-        <Card title="Clinical record">
-          {v.status === 'ACTIVE' && (
-            <p className="muted">This visit is being recorded by {v.doctor.full_name}. Only they can change it.</p>
-          )}
-          {v.status === 'COMPLETED' && <SuccessAlert>This visit is completed and kept in the patient's history.</SuccessAlert>}
-          <VisitDetails visit={v} />
-        </Card>
+        <>
+          <Card title="Clinical record">
+            {v.status === 'ACTIVE' && (
+              <p className="muted">This visit is being recorded by {v.doctor.full_name}. Only they can change it.</p>
+            )}
+            {v.status === 'COMPLETED' && <SuccessAlert>This visit is completed and kept in the patient's history.</SuccessAlert>}
+            <VisitDetails visit={v} />
+          </Card>
+          <Card title="Dental chart">
+            <DentalChart visit={v} />
+          </Card>
+        </>
       )}
     </>
   )
@@ -54,6 +60,7 @@ export function VisitPage() {
 function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visit) => void }) {
   const procedures = useAsync(() => api.listProcedures(), [])
   const medications = useAsync(() => api.listMedications(), [])
+  const dentalActions = useAsync(() => api.listDentalActionTypes(), [])
   const [notes, setNotes] = useState({ notes: visit.notes, diagnosis: visit.diagnosis, treatment: visit.treatment })
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -122,6 +129,10 @@ function VisitEditor({ visit, onChange }: { visit: Visit; onChange: (visit: Visi
             </button>
           </div>
         </form>
+      </Card>
+      <Card title="Dental chart">
+        <ErrorAlert error={dentalActions.error} onRetry={dentalActions.reload} />
+        <DentalChart visit={visit} actionTypes={dentalActions.data ?? []} onChange={onChange} />
       </Card>
       <div className="grid-2">
         <ProceduresCard visit={visit} catalog={procedures.data ?? []} onChange={onChange} />

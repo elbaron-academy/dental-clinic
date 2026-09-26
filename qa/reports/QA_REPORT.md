@@ -80,3 +80,31 @@ QA also corrected one issue in its own test code; it was not a product defect. T
 ## 6. Final status
 
 **QA_PASSED.** Every approved acceptance criterion passes, and no blocking or open defects remain. The Sprint 07 exit criteria are met.
+
+## 7. Sprint 10 — Dental chart (2026-09-27)
+
+Run on the production VM in a separate workspace (`~/dental-qa`): the e2e
+backend uses its own SQLite database on port 8001 and the PWA preview runs on
+port 4174, so production data and services were not touched.
+
+| Suite | Result |
+|---|---|
+| Backend lint, migrations check | ✅ clean, no changes |
+| Backend tests (SQLite) | ✅ **251 passed** |
+| API contract | ✅ regenerated, `--validate --fail-on-warn` clean |
+| QA API acceptance | ✅ **45 passed** (8 new in `test_dental_chart.py`) |
+| Web lint / types / unit | ✅ clean, **52 passed** |
+| Web + PWA e2e (Chromium) | ✅ **42 passed**, 0 flaky (5 new in `dental-chart.spec.ts`: 4 desktop, 1 mobile) |
+
+| Area | IDs | API acceptance | E2E | Result |
+|---|---|---|---|---|
+| Action types, colors, legend | CHART-001 | `test_dental_chart.py::test_default_action_types_have_colors`, `::test_action_types_follow_clinic_catalog_rules` | `dental-chart.spec.ts` (legend) | ✅ |
+| Mark / remove tooth actions, outcome | CHART-002 | `::test_doctor_charts_teeth_during_visit` | `::doctor marks, colors and removes…`, `::a charted tooth completes the visit…` | ✅ |
+| Permissions | CHART-003 | `::test_only_owning_doctor_changes_the_chart` | `::assistant sees the chart read-only; another doctor cannot open it` | ✅ |
+| Visit isolation | CHART-004 | `::test_each_visit_has_its_own_chart`, `::test_charts_of_two_patients_do_not_mix` | `::each visit starts with an empty chart` | ✅ |
+| UI / regression, phone layout | CHART-005 | — | `dental-chart.spec.ts` + full existing suite, `@mobile` | ✅ |
+
+Regression note: `doctor.spec.ts` now finds the procedure's tooth field with an
+exact label, because the chart's tooth buttons are also named "Tooth …". No
+product defects were found.
+

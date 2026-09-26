@@ -22,7 +22,7 @@ test.describe('Doctor visit', () => {
     await expect(page.getByText('Saved', { exact: true })).toBeVisible()
 
     await page.getByLabel('Procedure', { exact: true }).selectOption({ label: 'Composite filling (D2391)' })
-    await page.getByLabel('Tooth').fill('36')
+    await page.getByLabel('Tooth', { exact: true }).fill('36')
     await page.getByRole('button', { name: 'Add procedure' }).click()
     const procedures = page.getByRole('list', { name: 'Recorded procedures' })
     await expect(procedures).toContainText('Composite filling')
@@ -71,7 +71,7 @@ test.describe('Doctor visit', () => {
     await loginAs(page, USERS.amal)
     await page.goto(`/visits/${started.visit_id}`)
     await page.getByLabel('Procedure notes').fill('Check')
-    await page.getByLabel('Tooth').fill('99')
+    await page.getByLabel('Tooth', { exact: true }).fill('99')
     await page.getByRole('button', { name: 'Add procedure' }).click()
     await expect(page.getByText(/Use FDI tooth notation/)).toBeVisible()
   })

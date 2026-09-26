@@ -1,11 +1,16 @@
-"""Clinical catalog managed in Django Admin (DX-001, DX-002, MED-001).
+"""Clinical catalog managed in Django Admin (DX-001, DX-002, MED-001, CHART-001).
 
 Items without a clinic are available to every clinic. Items are deactivated
 rather than deleted so that visit history keeps its references.
 """
 
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
+
+validate_hex_color = RegexValidator(
+    r"^#[0-9A-Fa-f]{6}$", "Use a hex color such as #2563EB.", code="invalid_color"
+)
 
 
 class CatalogQuerySet(models.QuerySet):
@@ -57,3 +62,21 @@ class Medication(CatalogItem):
 
     class Meta(CatalogItem.Meta):
         pass
+
+
+class DentalActionType(CatalogItem):
+    """An action the doctor can mark on a tooth in the dental chart (CHART-001, CR-023).
+
+    The color paints the tooth on the chart and appears in the chart legend.
+    """
+
+    code = models.CharField(max_length=20, blank=True, help_text="Optional internal or ADA code.")
+    color = models.CharField(
+        max_length=7,
+        default="#2563EB",
+        validators=[validate_hex_color],
+        help_text="Tooth color on the dental chart, e.g. #2563EB.",
+    )
+
+    class Meta(CatalogItem.Meta):
+        verbose_name = "dental action type"

@@ -7,6 +7,7 @@ import type {
   Balance,
   CatalogMedication,
   CatalogProcedure,
+  DentalActionType,
   DoctorSummary,
   LoginResponse,
   Me,
@@ -86,6 +87,13 @@ export const completeVisit = (id: number) =>
   apiRequest<Visit>(`/visits/${id}/complete/`, { method: 'POST' })
 export const listProcedures = () => apiRequest<CatalogProcedure[]>('/catalog/procedures/')
 export const listMedications = () => apiRequest<CatalogMedication[]>('/catalog/medications/')
+
+// Dental chart (CHART-001..004)
+export const listDentalActionTypes = () => apiRequest<DentalActionType[]>('/catalog/dental-actions/')
+export const addToothAction = (id: number, input: { tooth: string; action_type_id: number; notes?: string }) =>
+  apiRequest<Visit>(`/visits/${id}/tooth-actions/`, { method: 'POST', body: input })
+export const removeToothAction = (id: number, entryId: number) =>
+  apiRequest<Visit>(`/visits/${id}/tooth-actions/${entryId}/`, { method: 'DELETE' })
 
 // Payments (Sprint 06)
 export const setAmountDue = (appointmentId: number, amountDue: string) =>

@@ -6,7 +6,12 @@ import { StatusBadge } from './ui'
 /** Read-only rendering of a visit's clinical record (history, completed visits). */
 export function VisitDetails({ visit }: { visit: Visit }) {
   const hasContent =
-    visit.notes || visit.diagnosis || visit.treatment || visit.procedures.length || visit.medications.length
+    visit.notes ||
+    visit.diagnosis ||
+    visit.treatment ||
+    visit.procedures.length ||
+    visit.tooth_actions.length ||
+    visit.medications.length
   return (
     <div className="visit-details">
       {!hasContent && <p className="muted">Nothing recorded yet.</p>}
@@ -20,6 +25,20 @@ export function VisitDetails({ visit }: { visit: Visit }) {
               <li key={entry.id}>
                 {entry.procedure?.name ?? 'Other'}
                 {entry.tooth && <span className="badge badge-muted">Tooth {entry.tooth}</span>}
+                {entry.notes && <span className="muted"> — {entry.notes}</span>}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+      {visit.tooth_actions.length > 0 && (
+        <Section title="Dental chart">
+          <ul className="plain-list" aria-label="Tooth actions">
+            {visit.tooth_actions.map((entry) => (
+              <li key={entry.id}>
+                <span className="swatch" style={{ background: entry.action_type.color }} aria-hidden="true" />
+                {entry.action_type.name}
+                <span className="badge badge-muted">Tooth {entry.tooth}</span>
                 {entry.notes && <span className="muted"> — {entry.notes}</span>}
               </li>
             ))}

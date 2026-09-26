@@ -11,6 +11,8 @@ const doctor = makeUser({
   permissions: ['visits.view_visit', 'visits.record_visit', 'visits.complete_visit'],
 })
 
+const FILLING = { id: 4, name: 'Filling', code: 'D2391', color: '#2563EB' }
+
 describe('visit page (VISIT-001..007)', () => {
   it('lets the owning doctor record and complete the visit', async () => {
     const visit = makeVisit()
@@ -18,6 +20,7 @@ describe('visit page (VISIT-001..007)', () => {
       'GET /api/visits/3/': () => ({ body: visit }),
       'GET /api/catalog/procedures/': () => ({ body: [{ id: 1, name: 'Composite filling', code: 'D2391' }] }),
       'GET /api/catalog/medications/': () => ({ body: [{ id: 2, name: 'Amoxicillin', details: '500 mg' }] }),
+      'GET /api/catalog/dental-actions/': () => ({ body: [FILLING] }),
       'PATCH /api/visits/3/': () => ({ body: { ...visit, diagnosis: 'Caries' } }),
       'POST /api/visits/3/complete/': () => ({
         body: { ...visit, diagnosis: 'Caries', status: 'COMPLETED', status_display: 'Completed', can_edit: false },
@@ -39,6 +42,7 @@ describe('visit page (VISIT-001..007)', () => {
       'GET /api/visits/3/': () => ({ body: visit }),
       'GET /api/catalog/procedures/': () => ({ body: [] }),
       'GET /api/catalog/medications/': () => ({ body: [{ id: 2, name: 'Amoxicillin', details: '500 mg' }] }),
+      'GET /api/catalog/dental-actions/': () => ({ body: [FILLING] }),
       'POST /api/visits/3/medications/': () => ({
         status: 201,
         body: {
@@ -66,5 +70,38 @@ describe('visit page (VISIT-001..007)', () => {
     expect(await screen.findByText('Gingivitis')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Complete visit' })).not.toBeInTheDocument()
     expect(screen.getByText(/Only they can change it/)).toBeInTheDocument()
+  })
+
+  it('lets the owning doctor mark teeth on the dental chart (CHART-002)', async () => {
+    const visit = makeVisit()
+    const { calls } = mockApi({
+      'GET /api/visits/3/': () => ({ body: visit }),
+      'GET /api/catalog/procedures/': () => ({ body: [] }),
+      'GET /api/catalog/medications/': () => ({ body: [] }),
+      'GET /api/catalog/dental-actions/': () => ({ body: [FILLING] }),
+      'POST /api/visits/3/tooth-actions/': () => ({
+        status: 201,
+        body: { ...visit, tooth_actions: [{ id: 8, tooth: '26', action_type: FILLING, notes: '' }] },
+      }),
+    })
+    renderWithAuth(<VisitPage />, { user: doctor, path: '/visits/3', route: '/visits/:id' })
+    await userEvent.click(await screen.findByRole('button', { name: 'Tooth 26: no actions' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Filling' }))
+    expect(await screen.findByRole('button', { name: 'Tooth 26: Filling' })).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Tooth actions' })).toHaveTextContent('Tooth 26')
+    expect(calls.at(-1)?.body).toEqual({ tooth: '26', action_type_id: 4, notes: '' })
+  })
+
+  it('shows a read-only dental chart to others', async () => {
+    mockApi({
+      'GET /api/visits/3/': () => ({
+        body: makeVisit({ can_edit: false, tooth_actions: [{ id: 8, tooth: '26', action_type: FILLING, notes: 'MO' }] }),
+      }),
+    })
+    const assistant = makeUser({ role: 'ASSISTANT', permissions: ['visits.view_visit'] })
+    renderWithAuth(<VisitPage />, { user: assistant, path: '/visits/3', route: '/visits/:id' })
+    expect(await screen.findByRole('img', { name: 'Tooth 26: Filling' })).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Tooth actions' })).toHaveTextContent('Filling')
+    expect(screen.queryByRole('button', { name: /^Tooth / })).not.toBeInTheDocument()
   })
 })

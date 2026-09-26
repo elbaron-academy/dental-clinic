@@ -16,6 +16,7 @@ from .serializers import (
     VisitMedicationSerializer,
     VisitProcedureSerializer,
     VisitSerializer,
+    VisitToothActionSerializer,
 )
 
 
@@ -46,6 +47,8 @@ class VisitViewSet(
         "partial_update": ("visits.record_visit",),
         "add_procedure": ("visits.record_visit",),
         "remove_procedure": ("visits.record_visit",),
+        "add_tooth_action": ("visits.record_visit",),
+        "remove_tooth_action": ("visits.record_visit",),
         "add_medication": ("visits.record_visit",),
         "remove_medication": ("visits.record_visit",),
         "add_follow_up": ("visits.record_visit",),
@@ -58,6 +61,7 @@ class VisitViewSet(
         queryset = scoped_visits(self.request.user).select_related("patient", "doctor")
         queryset = queryset.prefetch_related(
             "procedures__procedure",
+            "tooth_actions__action_type",
             "medications__medication",
             Prefetch("follow_ups", queryset=Appointment.objects.order_by("scheduled_at")),
         )
@@ -81,7 +85,8 @@ class VisitViewSet(
     def _add_entry(self, request, serializer_class):
         visit = self.get_object()
         services.ensure_recordable(visit, request.user)
-        serializer = serializer_class(data=request.data, context=self.get_serializer_context())
+        context = {**self.get_serializer_context(), "visit": visit}
+        serializer = serializer_class(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
         serializer.save(visit=visit)
         return self._visit_response(visit, status.HTTP_201_CREATED)
@@ -102,6 +107,18 @@ class VisitViewSet(
     @action(detail=True, methods=["delete"], url_path=r"procedures/(?P<entry_id>[0-9]+)")
     def remove_procedure(self, request, pk=None, entry_id=None):
         return self._remove_entry(request, "procedures", entry_id)
+
+    @extend_schema(request=VisitToothActionSerializer, responses={201: VisitSerializer})
+    @action(detail=True, methods=["post"], url_path="tooth-actions")
+    def add_tooth_action(self, request, pk=None):
+        """Mark an action on a tooth of this visit's dental chart (CHART-002)."""
+        return self._add_entry(request, VisitToothActionSerializer)
+
+    @extend_schema(request=None, responses=VisitSerializer)
+    @action(detail=True, methods=["delete"], url_path=r"tooth-actions/(?P<entry_id>[0-9]+)")
+    def remove_tooth_action(self, request, pk=None, entry_id=None):
+        """Remove a tooth action; only entries of this visit are found (CHART-004)."""
+        return self._remove_entry(request, "tooth_actions", entry_id)
 
     @extend_schema(request=VisitMedicationSerializer, responses={201: VisitSerializer})
     @action(detail=True, methods=["post"], url_path="medications")

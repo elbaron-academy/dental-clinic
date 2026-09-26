@@ -77,6 +77,16 @@ exception: it is written but, by design, not verified.**
 | MED-001 | Medications are configurable clinical data managed in Django Admin | medications.md | 05 | BE `catalog/tests/test_admin.py`, `catalog/tests/test_api.py` |
 | MED-002 | Doctor selects medications and records quantity/duration | medications.md | 05 | BE `visits/tests/test_api.py::test_add_medication_*`; E2E `doctor.spec.ts` |
 
+## Dental chart (CR-023)
+
+| ID | Requirement | Source | Sprint | Verification |
+|---|---|---|---|---|
+| CHART-001 | Dental action types with colors are catalog data managed in Django Admin; defaults are seeded; inactive types cannot be selected | visits.md | 10 | BE `visits/tests/test_tooth_actions.py::TestActionTypes`; API-QA `test_dental_chart.py::test_default_action_types_have_colors`, `::test_action_types_follow_clinic_catalog_rules`; Web `lib/teeth.test.ts`; E2E `dental-chart.spec.ts` (legend) |
+| CHART-002 | The owning doctor marks and removes actions on FDI teeth of an active visit, with notes; one action type once per tooth; a marked tooth is a session outcome | visits.md | 10 | BE `visits/tests/test_tooth_actions.py::TestRecording`; API-QA `test_dental_chart.py::test_doctor_charts_teeth_during_visit`; Web `components/DentalChart.test.tsx`, `pages/visits/VisitPage.test.tsx`; E2E `dental-chart.spec.ts::doctor marks, colors and removes…`, `::a charted tooth completes the visit…` |
+| CHART-003 | Only the owning doctor changes the chart; viewers see it read-only; reception does not see it; completed charts are locked | visits.md, users-and-roles.md | 10 | BE `visits/tests/test_tooth_actions.py::TestPermissions`; API-QA `test_dental_chart.py::test_only_owning_doctor_changes_the_chart`; Web `DentalChart.test.tsx` (read-only); E2E `dental-chart.spec.ts::assistant sees the chart read-only…` |
+| CHART-004 | Each visit has its own chart (visit isolation) | visits.md | 10 | BE `visits/tests/test_tooth_actions.py::TestVisitIsolation`; API-QA `test_dental_chart.py::test_each_visit_has_its_own_chart`, `::test_charts_of_two_patients_do_not_mix`; E2E `dental-chart.spec.ts::each visit starts with an empty chart` |
+| CHART-005 | Chart colors, legend, permanent/primary teeth and phone layout in the Web/PWA | visits.md | 10 | Web `DentalChart.test.tsx`, `lib/teeth.test.ts`; E2E `dental-chart.spec.ts` (desktop + `@mobile`) |
+
 ## Patient lifecycle
 
 | ID | Requirement | Source | Sprint | Verification |

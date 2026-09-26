@@ -71,6 +71,7 @@ class Visit(models.Model):
             or self.diagnosis.strip()
             or self.treatment.strip()
             or self.procedures.exists()
+            or self.tooth_actions.exists()
         )
 
 
@@ -97,6 +98,32 @@ class VisitProcedure(models.Model):
     def __str__(self) -> str:
         label = self.procedure.name if self.procedure else self.notes[:40]
         return f"{label} (tooth {self.tooth})" if self.tooth else label
+
+
+class VisitToothAction(models.Model):
+    """An action marked on one tooth of this visit's dental chart (CHART-002, CR-023).
+
+    Each visit has its own chart: actions never carry over to other visits.
+    """
+
+    visit = models.ForeignKey(Visit, on_delete=models.CASCADE, related_name="tooth_actions")
+    tooth = models.CharField(max_length=2, validators=[validate_tooth])
+    action_type = models.ForeignKey(
+        "catalog.DentalActionType", on_delete=models.PROTECT, related_name="+"
+    )
+    notes = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["visit", "tooth", "action_type"], name="one_action_type_per_tooth_per_visit"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.action_type} (tooth {self.tooth})"
 
 
 class VisitMedication(models.Model):

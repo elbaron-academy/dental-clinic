@@ -22,7 +22,7 @@ Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
 | CR-007 | Appointment cancellation | The lifecycle has no cancel step | Reception may cancel a *Scheduled* or *Checked-in* appointment. A cancelled appointment cannot be checked in, started or paid. | `apps/appointments/views.py` | TL-APPROVED DEFAULT |
 | CR-008 | Who starts the active visit | "Reception cannot start another active visit", so reception can start one | Reception (queue state) and the doctor (their own queue) can start a visit from a *Checked-in* appointment. The visit belongs to the appointment's doctor. To hand a patient to another doctor, reception changes the appointment's doctor before starting. | `apps/appointments/views.py` | TL-APPROVED DEFAULT |
 | CR-009 | Visit-history visibility across doctors | Scoping to "permitted doctors" vs. a shared clinical history | Strict scoping: a user sees only visits handled by doctors they are permitted for. A doctor who shares a patient with another doctor does **not** see that doctor's visits. | `apps/core/scoping.py` | OPEN – needs PO decision (strict default in place) |
-| CR-010 | Completing a visit | "completes the visit after recording the session outcome" | Completion needs at least one recorded outcome (notes, diagnosis, treatment or a procedure). Completed visits are read-only. | `apps/visits/services.py` | TL-APPROVED DEFAULT |
+| CR-010 | Completing a visit | "completes the visit after recording the session outcome" | Completion needs at least one recorded outcome (notes, diagnosis, treatment, a procedure or a tooth action, CR-023). Completed visits are read-only. | `apps/visits/services.py` | TL-APPROVED DEFAULT |
 | CR-011 | Tooth notation | Not defined | Optional FDI two-digit notation: permanent 11–48, primary 51–85. | `apps/visits/validators.py` | TL-APPROVED DEFAULT |
 | CR-012 | Medication details | "required quantity/duration information" | Each prescribed medication needs a catalog medication plus free-text **quantity** and **duration**. Both are required. | `apps/visits/serializers.py` | TL-APPROVED DEFAULT |
 | CR-013 | Follow-up visits | Mechanism not defined | While the visit is active, the owning doctor records a follow-up. This creates a *Scheduled* appointment with the same doctor, linked to the originating visit. Reception can also book ordinary appointments at any time. | `apps/visits/views.py` | TL-APPROVED DEFAULT |
@@ -34,6 +34,7 @@ Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
 | CR-019 | API session model | Not defined | DRF token authentication. The token lasts until logout. Login is rate-limited (default 10/min per client). | `config/settings.py` | TL-APPROVED DEFAULT |
 | CR-020 | Time zone for "today" | Not defined | Timestamps are stored in UTC. Clients send their local day as `scheduled_from`/`scheduled_to`, and the server `TIME_ZONE` is configurable. | `apps/appointments/filters.py` | TL-APPROVED DEFAULT |
 | CR-021 | Doctors register patients | Patient registration was a receptionist duty only | **Product owner decision (2026-09-26):** every doctor can register patients by default (`patients.add_patient` in the Doctor role). The patient is assigned to the registering doctor, the only doctor they are permitted for. Editing patients and booking appointments stay with reception. `business-logic/users-and-roles.md` is updated. | `apps/accounts/roles.py` | PO-APPROVED |
+| CR-023 | Dental chart | `visits.md` only mentioned "tooth/procedure information" | **Product owner request (2026-09-27):** a per-visit dental chart. Dental action types (name, optional code, hex color) are catalog items managed in Django Admin; seven global defaults are seeded (Caries, Filling, Root canal, Crown, Extraction, Implant, Scaling). The owning doctor marks actions on FDI teeth of an active visit; one action type once per tooth per visit; optional notes. Each visit's chart is isolated (no carry-over). A tooth action counts as a session outcome (CR-010). Viewing follows `visits.view_visit`; changing follows `visits.record_visit` + ownership, like procedures. The existing procedures list stays unchanged. `business-logic/visits.md` is updated. | `apps/catalog/models.py`, `apps/visits/models.py` | PO-APPROVED |
 | CR-022 | Doctors book appointments | Booking appointments was a receptionist duty only | **Product owner decision (2026-09-27):** every doctor can create appointments by default (`appointments.add_appointment` in the Doctor role). The doctor is selected automatically, and only their own patients can be booked. Check-in, rescheduling, cancelling and billing stay with reception. `business-logic/users-and-roles.md` is updated. | `apps/accounts/roles.py` | PO-APPROVED |
 
 ## Permission matrix
@@ -53,8 +54,8 @@ and permitted-doctor scoping, and ownership of the active visit.
 | Check patient in | `appointments.check_in_appointment` | | | ✓ |
 | Cancel appointment | `appointments.cancel_appointment` | | | ✓ |
 | Start active visit | `visits.start_visit` | ✓ | | ✓ |
-| View visit history (clinical) | `visits.view_visit` | ✓ | ✓ | |
-| Record clinical session (owner only) | `visits.record_visit` | ✓ | | |
+| View visit history (clinical), incl. dental chart | `visits.view_visit` | ✓ | ✓ | |
+| Record clinical session, incl. dental chart (owner only) | `visits.record_visit` | ✓ | | |
 | Complete visit (owner only) | `visits.complete_visit` | ✓ | | |
 | View billing / payments | `payments.view_payment` | | | ✓ |
 | Set amount due | `payments.manage_billing` | | | ✓ |

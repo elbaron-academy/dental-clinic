@@ -2,13 +2,19 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import Medication, Procedure
+from .models import DentalActionType, Medication, Procedure
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Procedure
         fields = ["id", "name", "code"]
+
+
+class DentalActionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DentalActionType
+        fields = ["id", "name", "code", "color"]
 
 
 class MedicationSerializer(serializers.ModelSerializer):

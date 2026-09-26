@@ -752,6 +752,268 @@ textarea {
   margin: 0;
 }
 
+/* Dental chart (CHART-001..004) */
+.dental-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.chart-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.segment {
+  border: none;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.8rem;
+  min-height: 36px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.segment + .segment {
+  border-left: 1px solid var(--border);
+}
+
+.segment[aria-pressed='true'] {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.segment:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus);
+}
+
+.segment-count {
+  background: var(--brand);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 0 0.4rem;
+  line-height: 1.4;
+}
+
+.chart-arches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.chart-side {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.chart-quadrant {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.chart-quadrant:first-child {
+  justify-content: flex-end;
+  padding-right: 0.6rem;
+  border-right: 2px solid var(--border);
+}
+
+.chart-occlusal {
+  border: none;
+  border-top: 2px dashed var(--border);
+  margin: 0.1rem 0;
+  width: 100%;
+}
+
+.tooth {
+  flex: 1 1 0;
+  max-width: 48px;
+  min-width: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  border-radius: 10px 10px 14px 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 0;
+}
+
+button.tooth {
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+button.tooth:hover {
+  border-color: var(--brand);
+}
+
+button.tooth:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.tooth-marked {
+  border-color: rgb(16 24 40 / 25%);
+}
+
+.tooth-multi {
+  text-shadow: 0 0 3px rgb(0 0 0 / 70%);
+}
+
+.tooth-selected {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.action-picker {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.action-chip:hover:not(:disabled) {
+  border-color: var(--brand);
+}
+
+.action-chip[aria-pressed='true'] {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  font-weight: 600;
+}
+
+.action-chip[aria-pressed='true']::after {
+  content: '✓';
+  color: var(--brand-strong);
+}
+
+.action-chip:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.action-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 4px;
+  border: 1px solid rgb(16 24 40 / 20%);
+  margin-right: 0.35rem;
+  vertical-align: -0.1rem;
+  flex-shrink: 0;
+}
+
+.action-chip .swatch {
+  margin-right: 0;
+}
+
+.chart-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.chart-empty {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .chart-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .chart-quadrant:first-child {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .chart-quadrant {
+    justify-content: center;
+  }
+
+  .chart-side {
+    display: none;
+  }
+
+  .tooth {
+    min-height: 40px;
+  }
+}
+
 /* Auth */
 .auth-page {
   min-height: 100vh;

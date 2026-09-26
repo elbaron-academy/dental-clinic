@@ -3,15 +3,16 @@ from rest_framework import serializers
 
 from apps.accounts.serializers import DoctorSummarySerializer
 from apps.appointments.models import Appointment
-from apps.catalog.models import Medication, Procedure
+from apps.catalog.models import DentalActionType, Medication, Procedure
 from apps.catalog.serializers import (
     AvailableCatalogField,
+    DentalActionTypeSerializer,
     MedicationSerializer,
     ProcedureSerializer,
 )
 from apps.patients.serializers import PatientSummarySerializer
 
-from .models import Visit, VisitMedication, VisitProcedure
+from .models import Visit, VisitMedication, VisitProcedure, VisitToothAction
 
 
 class VisitProcedureSerializer(serializers.ModelSerializer):
@@ -33,6 +34,37 @@ class VisitProcedureSerializer(serializers.ModelSerializer):
         if not attrs.get("procedure") and not attrs.get("notes", "").strip():
             raise serializers.ValidationError(
                 {"procedure_id": ["Select a procedure or describe it in the notes."]}
+            )
+        return attrs
+
+
+class VisitToothActionSerializer(serializers.ModelSerializer):
+    """One action on one tooth of the visit's dental chart (CHART-002)."""
+
+    action_type = DentalActionTypeSerializer(read_only=True)
+    action_type_id = AvailableCatalogField(
+        DentalActionType,
+        source="action_type",
+        write_only=True,
+        help_text="Active dental action type available to the clinic (CHART-001).",
+    )
+
+    class Meta:
+        model = VisitToothAction
+        fields = ["id", "tooth", "action_type", "action_type_id", "notes"]
+        extra_kwargs = {"tooth": {"help_text": "FDI notation: 11-48 permanent, 51-85 primary."}}
+
+    def validate(self, attrs):
+        visit = self.context.get("visit")
+        duplicate = (
+            visit is not None
+            and visit.tooth_actions.filter(
+                tooth=attrs["tooth"], action_type=attrs["action_type"]
+            ).exists()
+        )
+        if duplicate:
+            raise serializers.ValidationError(
+                {"action_type_id": [f"Tooth {attrs['tooth']} already has this action."]}
             )
         return attrs
 
@@ -65,6 +97,7 @@ class VisitSerializer(serializers.ModelSerializer):
     doctor = DoctorSummarySerializer(read_only=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
     procedures = VisitProcedureSerializer(many=True, read_only=True)
+    tooth_actions = VisitToothActionSerializer(many=True, read_only=True)
     medications = VisitMedicationSerializer(many=True, read_only=True)
     follow_ups = FollowUpSerializer(many=True, read_only=True)
     can_edit = serializers.SerializerMethodField()
@@ -84,6 +117,7 @@ class VisitSerializer(serializers.ModelSerializer):
             "diagnosis",
             "treatment",
             "procedures",
+            "tooth_actions",
             "medications",
             "follow_ups",
             "can_edit",

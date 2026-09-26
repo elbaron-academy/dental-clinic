@@ -374,6 +374,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /api/catalog/dental-actions/:
+    get:
+      operationId: catalog_dental_actions_list
+      description: Active dental chart actions available to the user's clinic, with
+        colors (CHART-001).
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - catalog
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DentalActionType'
+          description: ''
+  /api/catalog/dental-actions/{id}/:
+    get:
+      operationId: catalog_dental_actions_retrieve
+      description: Active dental chart actions available to the user's clinic, with
+        colors (CHART-001).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dental action type.
+        required: true
+      tags:
+      - catalog
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DentalActionType'
+          description: ''
   /api/catalog/medications/:
     get:
       operationId: catalog_medications_list
@@ -1185,6 +1241,66 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/visits/{id}/tooth-actions/:
+    post:
+      operationId: visits_tooth_actions_create
+      description: Mark an action on a tooth of this visit's dental chart (CHART-002).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitToothActionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisitToothActionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisitToothActionRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/tooth-actions/{entry_id}/:
+    delete:
+      operationId: visits_tooth_actions_destroy
+      description: Remove a tooth action; only entries of this visit are found (CHART-004).
+      parameters:
+      - in: path
+        name: entry_id
+        schema:
+          type: string
+          pattern: ^[0-9]+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - visits
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
     AmountDueRequest:
@@ -1369,6 +1485,46 @@ components:
       required:
       - doctor_count
       - id
+      - name
+    DentalActionType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        code:
+          type: string
+          description: Optional internal or ADA code.
+          maxLength: 20
+        color:
+          type: string
+          description: 'Tooth color on the dental chart, e.g. #2563EB.'
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+      required:
+      - id
+      - name
+    DentalActionTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        code:
+          type: string
+          description: Optional internal or ADA code.
+          maxLength: 20
+        color:
+          type: string
+          minLength: 1
+          description: 'Tooth color on the dental chart, e.g. #2563EB.'
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+      required:
       - name
     DoctorSummary:
       type: object
@@ -2000,6 +2156,11 @@ components:
           items:
             $ref: '#/components/schemas/VisitProcedure'
           readOnly: true
+        tooth_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/VisitToothAction'
+          readOnly: true
         medications:
           type: array
           items:
@@ -2026,6 +2187,7 @@ components:
       - started_at
       - status
       - status_display
+      - tooth_actions
     VisitMedication:
       type: object
       properties:
@@ -2114,6 +2276,47 @@ components:
       description: |-
         * `ACTIVE` - Active
         * `COMPLETED` - Completed
+    VisitToothAction:
+      type: object
+      description: One action on one tooth of the visit's dental chart (CHART-002).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tooth:
+          type: string
+          description: 'FDI notation: 11-48 permanent, 51-85 primary.'
+          maxLength: 2
+        action_type:
+          allOf:
+          - $ref: '#/components/schemas/DentalActionType'
+          readOnly: true
+        notes:
+          type: string
+          maxLength: 255
+      required:
+      - action_type
+      - id
+      - tooth
+    VisitToothActionRequest:
+      type: object
+      description: One action on one tooth of the visit's dental chart (CHART-002).
+      properties:
+        tooth:
+          type: string
+          minLength: 1
+          description: 'FDI notation: 11-48 permanent, 51-85 primary.'
+          maxLength: 2
+        action_type_id:
+          type: integer
+          writeOnly: true
+          description: Active dental action type available to the clinic (CHART-001).
+        notes:
+          type: string
+          maxLength: 255
+      required:
+      - action_type_id
+      - tooth
   securitySchemes:
     cookieAuth:
       type: apiKey

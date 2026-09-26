@@ -52,8 +52,8 @@ def complete_visit(visit: Visit, user) -> Visit:
     ensure_recordable(visit, user)
     if not visit.has_outcome():
         raise BusinessRuleViolation(
-            "Record the session outcome (notes, diagnosis, treatment or a procedure) "
-            "before completing the visit.",
+            "Record the session outcome (notes, diagnosis, treatment, a procedure "
+            "or a tooth action) before completing the visit.",
             code="outcome_required",
         )
     visit.status = VisitStatus.COMPLETED

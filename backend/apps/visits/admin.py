@@ -1,10 +1,15 @@
 from django.contrib import admin
 
-from .models import Visit, VisitMedication, VisitProcedure
+from .models import Visit, VisitMedication, VisitProcedure, VisitToothAction
 
 
 class VisitProcedureInline(admin.TabularInline):
     model = VisitProcedure
+    extra = 0
+
+
+class VisitToothActionInline(admin.TabularInline):
+    model = VisitToothAction
     extra = 0
 
 
@@ -20,4 +25,4 @@ class VisitAdmin(admin.ModelAdmin):
     search_fields = ("patient__full_name", "patient__phone")
     raw_id_fields = ("patient", "doctor", "appointment", "started_by")
     readonly_fields = ("started_at", "completed_at", "updated_at")
-    inlines = [VisitProcedureInline, VisitMedicationInline]
+    inlines = [VisitProcedureInline, VisitToothActionInline, VisitMedicationInline]

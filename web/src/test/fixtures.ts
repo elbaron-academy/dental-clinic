@@ -33,6 +33,7 @@ export function makeVisit(overrides: Partial<Visit> = {}): Visit {
     diagnosis: '',
     treatment: '',
     procedures: [],
+    tooth_actions: [],
     medications: [],
     follow_ups: [],
     can_edit: true,
