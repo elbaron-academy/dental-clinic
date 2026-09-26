@@ -97,7 +97,7 @@ git fetch --quiet origin
 git checkout --quiet '$BRANCH'
 git reset --hard --quiet '$SHA'
 "
-  [[ $DO_BACKEND -eq 1 ]] && remote+="sudo backend/deploy/deploy.sh --domain '$API_DOMAIN'
+  [[ $DO_BACKEND -eq 1 ]] && remote+="sudo backend/deploy/deploy.sh --domain '$API_DOMAIN' --root-redirect /admin/
 "
   [[ $DO_WEB -eq 1 ]] && remote+="sudo web/deploy/deploy.sh --domain '$WEB_DOMAIN' --api-url 'https://$API_DOMAIN'
 "

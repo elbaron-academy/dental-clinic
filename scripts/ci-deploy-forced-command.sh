@@ -35,6 +35,6 @@ as_owner git -C "$REPO" checkout --quiet "$BRANCH"
 as_owner git -C "$REPO" reset --hard --quiet "$sha"
 
 cd "$REPO"
-backend/deploy/deploy.sh --domain "$API_DOMAIN"
+backend/deploy/deploy.sh --domain "$API_DOMAIN" --root-redirect /admin/
 web/deploy/deploy.sh --domain "$WEB_DOMAIN" --api-url "https://$API_DOMAIN"
 echo "Deployed ${sha:0:7}"

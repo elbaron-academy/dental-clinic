@@ -131,6 +131,10 @@ STORAGES = {
     },
 }
 
+# Unknown names fall back to the plain path instead of raising a 500. jazzmin's
+# base template asks for the "vendor/bootswatch" directory, which has no manifest entry.
+WHITENOISE_MANIFEST_STRICT = False
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # REST framework

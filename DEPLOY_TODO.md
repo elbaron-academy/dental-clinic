@@ -27,7 +27,7 @@ it has finished. The manual equivalent on the server:
 ```bash
 ssh dental
 cd /srv/dental-clinic/repo && git pull --ff-only
-sudo backend/deploy/deploy.sh --domain api.dental.hossam-ameen.online
+sudo backend/deploy/deploy.sh --domain api.dental.hossam-ameen.online --root-redirect /admin/
 sudo web/deploy/deploy.sh --domain dental.hossam-ameen.online --api-url https://api.dental.hossam-ameen.online
 ```
 

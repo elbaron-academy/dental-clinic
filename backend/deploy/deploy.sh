@@ -17,6 +17,8 @@
 #   --name NAME       Name for the system user, service and nginx files (default: dental-clinic)
 #   --port PORT       Local port gunicorn listens on (default: 8000)
 #   --keep N          How many releases to keep (default: 5)
+#   --root-redirect P Redirect "/" to path P (e.g. /admin/). Only when the API has its
+#                     own domain; on a shared domain "/" belongs to the Web/PWA.
 #   --rollback        Switch back to the previous release and restart
 #   -h, --help        Show this help
 #
@@ -33,6 +35,7 @@ NAME="dental-clinic"
 PORT="8000"
 KEEP="5"
 ROLLBACK=0
+ROOT_REDIRECT=""
 
 log() { printf '\033[1;34m==> %s\033[0m\n' "$*"; }
 die() { printf '\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
@@ -45,6 +48,7 @@ while [[ $# -gt 0 ]]; do
     --name)     NAME="${2:?--name needs a value}"; shift 2 ;;
     --port)     PORT="${2:?--port needs a value}"; shift 2 ;;
     --keep)     KEEP="${2:?--keep needs a value}"; shift 2 ;;
+    --root-redirect) ROOT_REDIRECT="${2:?--root-redirect needs a value}"; shift 2 ;;
     --rollback) ROLLBACK=1; shift ;;
     -h|--help)  usage ;;
     *)          echo "Unknown option: $1" >&2; usage 1 ;;
@@ -231,6 +235,11 @@ log "Installing nginx config"
 ensure_site
 tmp="$(mktemp)"
 render "$DEPLOY_DIR/nginx-backend.conf.template" > "$tmp"
+if [[ -n "$ROOT_REDIRECT" ]]; then
+  [[ "$ROOT_REDIRECT" =~ ^/[A-Za-z0-9/_.-]*$ ]] || die "--root-redirect must be a path like /admin/"
+  printf '\n# The API has its own domain: send visitors of "/" to %s.\nlocation = / {\n    return 302 %s;\n}\n' \
+    "$ROOT_REDIRECT" "$ROOT_REDIRECT" >> "$tmp"
+fi
 install_nginx_conf "$tmp" "$NGINX_DIR/backend.conf"
 rm -f "$tmp"
 
