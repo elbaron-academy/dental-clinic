@@ -1,0 +1,76 @@
+DENTAL CLINIC - PRODUCTION DEPLOYMENT DETAILS
+=============================================
+Last updated: 2026-09-26
+
+SERVER
+------
+GCP project      : hossam-project-503909
+VM name / zone   : dental-clinic / us-central1-a (e2-medium: 2 vCPU, 4 GB, Ubuntu 24.04)
+External IP      : 34.123.215.195 (ephemeral - reserve it as static, see DEPLOY_TODO.md)
+SSH              : ssh dental            (alias in ~/.ssh/config -> hossam@34.123.215.195)
+Git checkout     : /srv/dental-clinic/repo   (branch claude/adoring-goldberg-ye6g4m, HTTPS clone)
+System user      : dental-clinic         (runs the backend, builds the frontend; no login)
+
+DEPLOY (from your machine, after git push)
+------------------------------------------
+dental-deploy                 # alias -> scripts/deploy-to-server.sh
+                              # waits for CI on the pushed commit, pulls on the server,
+                              # deploys backend then frontend, and notifies you when finished
+dental-deploy --no-ci         # skip waiting for CI
+dental-deploy --backend-only | --web-only
+
+BACKEND (Django API + admin)
+----------------------------
+URL              : https://api.dental.hossam-ameen.online
+Health check     : https://api.dental.hossam-ameen.online/api/health/
+Admin            : https://api.dental.hossam-ameen.online/admin/
+Install path     : /srv/dental-clinic/backend
+  releases       : /srv/dental-clinic/backend/releases/<YYYYMMDD-HHMMSS>/  (last 5 kept)
+  current        : /srv/dental-clinic/backend/current -> releases/<latest>
+  settings       : /srv/dental-clinic/backend/shared/.env   (secrets, mode 600)
+  database       : /srv/dental-clinic/backend/shared/db.sqlite3  (SQLite for now)
+  static files   : /srv/dental-clinic/backend/current/staticfiles/
+  revision       : /srv/dental-clinic/backend/current/REVISION
+systemd service  : dental-clinic-backend.service
+  unit file      : /etc/systemd/system/dental-clinic-backend.service
+  gunicorn       : 127.0.0.1:8000, 2 workers (GUNICORN_WORKERS in shared/.env)
+nginx            : /etc/nginx/sites-available/api.dental.hossam-ameen.online.conf
+                   /etc/nginx/dental-clinic/api.dental.hossam-ameen.online/backend.conf
+Deploy script    : sudo backend/deploy/deploy.sh --domain api.dental.hossam-ameen.online
+Rollback         : sudo backend/deploy/deploy.sh --domain api.dental.hossam-ameen.online --rollback
+Django commands  : sudo backend/deploy/manage.sh <command>      (e.g. createsuperuser)
+
+Useful commands:
+  sudo systemctl status dental-clinic-backend
+  sudo systemctl restart dental-clinic-backend
+  sudo journalctl -u dental-clinic-backend -f
+  sudo nano /srv/dental-clinic/backend/shared/.env   (then restart the service)
+
+FRONTEND / PWA (React + Vite, static files)
+-------------------------------------------
+URL              : https://dental.hossam-ameen.online
+Install path     : /srv/dental-clinic/web
+  releases       : /srv/dental-clinic/web/releases/<YYYYMMDD-HHMMSS>/  (built dist/, last 5 kept)
+  current        : /srv/dental-clinic/web/current -> releases/<latest>
+  revision       : /srv/dental-clinic/web/current/REVISION
+systemd service  : none - nginx serves the files directly (nginx.service)
+API origin       : built with VITE_API_BASE_URL=https://api.dental.hossam-ameen.online
+nginx            : /etc/nginx/sites-available/dental.hossam-ameen.online.conf
+                   /etc/nginx/dental-clinic/dental.hossam-ameen.online/web.conf
+                   /etc/nginx/dental-clinic/security-headers.conf
+Deploy script    : sudo web/deploy/deploy.sh --domain dental.hossam-ameen.online \
+                     --api-url https://api.dental.hossam-ameen.online
+Rollback         : sudo web/deploy/deploy.sh --domain dental.hossam-ameen.online --rollback
+
+Useful commands:
+  sudo nginx -t && sudo systemctl reload nginx
+  sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log
+
+HTTPS
+-----
+Let's Encrypt via certbot (nginx plugin), both domains in one certificate.
+Auto renew       : certbot.timer   (check: sudo certbot renew --dry-run)
+
+BACKUP (SQLite)
+---------------
+sudo sqlite3 /srv/dental-clinic/backend/shared/db.sqlite3 ".backup /var/backups/dental-$(date +%F).sqlite3"

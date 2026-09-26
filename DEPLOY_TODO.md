@@ -18,7 +18,11 @@ Replace `clinic.example.com` with your domain everywhere.
 | TLS | Let's Encrypt for both domains (no email registered), auto-renew via `certbot.timer` |
 
 The PWA and the API use two domains here, not the single-origin layout described below.
-Routine deploy:
+Every path, service name and URL is listed in [deploy-details.txt](deploy-details.txt).
+
+Routine deploy from your machine, after `git push`: run `dental-deploy`
+(`scripts/deploy-to-server.sh`). It waits for CI, deploys on the server and notifies you when
+it has finished. The manual equivalent on the server:
 
 ```bash
 ssh dental
