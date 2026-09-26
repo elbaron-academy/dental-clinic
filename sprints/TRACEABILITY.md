@@ -112,7 +112,7 @@ exception: it is written but, by design, not verified.**
 | ADMIN-001 | Doctors have their own Django Admin page (`accounts.Doctor` proxy) | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_doctor_page_*`, `::test_admin_pages_load` |
 | ADMIN-002 | Django Admin uses the django-jazzmin theme | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_admin_pages_load` |
 | OPS-001 | Deployment to the production VM (nginx, gunicorn/systemd, HTTPS) | product owner, 2026-09-26 | 08 | `DEPLOY_TODO.md`, `deploy-details.txt`; health check in `backend/deploy/deploy.sh` and `web/deploy/deploy.sh` |
-| OPS-002 | Web/PWA shows its version and build commit | product owner, 2026-09-27 | 09 | Web `src/components/AppVersion.test.tsx` |
+| OPS-002 | Web/PWA shows its version and build commit | product owner, 2026-09-27 | 09 | Web `src/components/AppVersion.test.tsx` (`src/lib/version.ts`) |
 | OPS-003 | Push to the deploy branch deploys automatically after CI passes | product owner, 2026-09-27 | 09 | `.github/workflows/ci.yml` (`deploy` job), `scripts/ci-deploy-forced-command.sh` |
 
 ## Coverage check

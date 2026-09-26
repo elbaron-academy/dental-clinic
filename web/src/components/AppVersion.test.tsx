@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { AppVersion, versionLabel } from './AppVersion'
+import { versionLabel } from '../lib/version'
+import { AppVersion } from './AppVersion'
 
 describe('AppVersion', () => {
   it('shows the package version from the build', () => {
