@@ -12,7 +12,7 @@
                 │  /admin/ clinic setup, staff, role permissions, catalog, methods  │
                 └───────────────────────────────┬──────────────────────────────────┘
                                                 ▼
-                                SQLite (dev/tests) · PostgreSQL (prod, CI)
+                                SQLite (dev/tests/CI) · PostgreSQL (later)
 ```
 
 ## Repository layout
@@ -101,7 +101,7 @@ Everything comes from environment variables (`backend/.env.example`):
 
 | Job | Gate |
 |---|---|
-| Backend (SQLite, PostgreSQL) | ruff lint + format, migrations up to date, pytest with coverage, OpenAPI contract drift check |
+| Backend (SQLite) | ruff lint + format, migrations up to date, pytest with coverage, OpenAPI contract drift check |
 | Web/PWA | oxlint, TypeScript, Vitest, production build |
-| QA | API acceptance (pytest), Web + PWA end-to-end (Playwright, desktop + mobile Chromium) |
+| QA | Not run in CI for now (product owner, 2026-09-27). The suites in `qa/` are kept up to date. |
 | Flutter | none: runtime testing is disabled for the MVP |

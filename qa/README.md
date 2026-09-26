@@ -19,3 +19,6 @@ Outside CI, servers that are already running are reused. The HTML report is
 written to `playwright-report/` (`npm run report`).
 
 Flutter is not tested in the MVP.
+
+These suites are not run in CI for now (product owner, 2026-09-27). Keep them
+up to date with every business change anyway.

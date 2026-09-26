@@ -79,7 +79,7 @@ cd qa && npm install && npx playwright test       # Web + PWA end-to-end (starts
 ```
 
 To run the backend tests against PostgreSQL, set
-`DATABASE_URL=postgres://user:pass@host:5432/db`. CI runs both databases
+`DATABASE_URL=postgres://user:pass@host:5432/db`. CI runs SQLite only for now
 (see [.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
 ## Production notes
