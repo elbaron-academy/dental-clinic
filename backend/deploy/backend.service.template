@@ -1,0 +1,36 @@
+# Installed by backend/deploy/deploy.sh as /etc/systemd/system/__NAME__-backend.service
+[Unit]
+Description=__NAME__ Django backend (gunicorn)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=__USER__
+Group=__USER__
+WorkingDirectory=__APP_DIR__/current
+EnvironmentFile=__APP_DIR__/shared/.env
+Environment=GUNICORN_BIND=127.0.0.1:__PORT__
+ExecStart=__APP_DIR__/current/.venv/bin/gunicorn --config __APP_DIR__/current/deploy/gunicorn.conf.py config.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+
+# Hardening: the service can only write to shared/.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=__APP_DIR__/shared
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
