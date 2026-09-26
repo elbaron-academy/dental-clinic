@@ -37,7 +37,7 @@ EXPECTED = {
     "patients.add_patient": (True, False, True),  # CR-021
     "patients.change_patient": (False, False, True),
     "appointments.view_appointment": (True, True, True),
-    "appointments.add_appointment": (False, False, True),
+    "appointments.add_appointment": (True, False, True),  # CR-022
     "appointments.check_in_appointment": (False, False, True),
     "appointments.cancel_appointment": (False, False, True),
     "visits.start_visit": (True, False, True),

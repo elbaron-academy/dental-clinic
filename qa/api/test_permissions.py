@@ -36,10 +36,32 @@ def test_doctor_manages_clinical_information_of_assigned_patients(smile, login):
     doctor = login(smile.doctor_a)
     assert doctor.get(f"/api/patients/{patient['id']}/").status_code == 200
     assert doctor.patch(f"/api/visits/{visit_id}/", {"diagnosis": "Caries"}).status_code == 200
-    # Other reception work stays with reception by default.
-    assert doctor.post(
-        "/api/appointments/", {"patient_id": patient["id"], "scheduled_at": later()}
-    ).status_code == 403
+    # Check-in and billing stay with reception by default.
+    follow_up = book(doctor, patient["id"])
+    assert doctor.post(f"/api/appointments/{follow_up['id']}/check-in/").status_code == 403
+
+
+def test_doctor_books_appointments_for_own_patients_only(smile, login):
+    """CR-022: a doctor books appointments; the doctor is selected automatically."""
+    reception = login(smile.receptionist)
+    mine = register(reception, "Mine", doctor_ids=[smile.doctor_a.id])
+    theirs = register(reception, "Theirs", doctor_ids=[smile.doctor_b.id])
+    doctor = login(smile.doctor_a)
+    appointment = book(doctor, mine["id"])
+    assert appointment["doctor"]["id"] == smile.doctor_a.id
+    assert appointment["status"] == "SCHEDULED"
+    # Reception sees it in the queue of that doctor.
+    assert reception.get(f"/api/appointments/{appointment['id']}/").status_code == 200
+    # Not for another doctor, and not for another doctor's patient.
+    other_doctor = doctor.post(
+        "/api/appointments/",
+        {"patient_id": mine["id"], "doctor_id": smile.doctor_b.id, "scheduled_at": later()},
+    )
+    assert other_doctor.status_code == 400
+    other_patient = doctor.post(
+        "/api/appointments/", {"patient_id": theirs["id"], "scheduled_at": later()}
+    )
+    assert other_patient.status_code == 400
 
 
 def test_doctor_registers_patient_assigned_to_themself(smile, login):

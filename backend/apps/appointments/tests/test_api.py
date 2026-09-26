@@ -83,11 +83,32 @@ class TestCreate:
         assert response.status_code == 400
         assert field in response.json()
 
-    @pytest.mark.parametrize("role_fixture", ["doctor", "assistant"])
-    def test_only_reception_books_by_default(self, request, client_for, patient, role_fixture):
-        user = request.getfixturevalue(role_fixture)
-        response = client_for(user).post(URL, {"patient_id": patient.id, "scheduled_at": at()})
+    def test_assistant_cannot_book_by_default(self, client_for, assistant, patient):
+        response = client_for(assistant).post(URL, {"patient_id": patient.id, "scheduled_at": at()})
         assert response.status_code == 403
+
+    def test_doctor_books_own_patient(self, client_for, doctor, second_doctor, patient):
+        """CR-022: the doctor is selected automatically (their only permitted doctor)."""
+        response = client_for(doctor).post(URL, {"patient_id": patient.id, "scheduled_at": at()})
+        assert response.status_code == 201, response.content
+        assert response.json()["doctor"]["id"] == doctor.id
+        assert response.json()["status"] == "SCHEDULED"
+
+    def test_doctor_cannot_book_for_another_doctor(
+        self, client_for, doctor, second_doctor, patient
+    ):
+        response = client_for(doctor).post(
+            URL, {"patient_id": patient.id, "doctor_id": second_doctor.id, "scheduled_at": at()}
+        )
+        assert response.status_code == 400
+        assert "doctor_id" in response.json()
+
+    def test_doctor_cannot_book_another_doctors_patient(
+        self, client_for, clinic, doctor, second_doctor
+    ):
+        theirs = testing.make_patient(clinic, [second_doctor])
+        response = client_for(doctor).post(URL, {"patient_id": theirs.id, "scheduled_at": at()})
+        assert response.status_code == 400
 
 
 class TestUpdate:

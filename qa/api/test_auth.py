@@ -56,6 +56,8 @@ def test_role_permissions_are_exposed_for_role_aware_ui(smile, login):
     assert "visits.record_visit" not in reception["permissions"]
     assert "visits.record_visit" in doctor["permissions"]
     assert "patients.add_patient" in doctor["permissions"]  # CR-021
+    assert "appointments.add_appointment" in doctor["permissions"]  # CR-022
+    assert "appointments.check_in_appointment" not in doctor["permissions"]
     assert "payments.add_payment" not in doctor["permissions"]
 
 

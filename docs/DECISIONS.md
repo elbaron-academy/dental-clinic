@@ -34,6 +34,7 @@ Status values: `TL-APPROVED DEFAULT` (implemented, awaiting product owner) ·
 | CR-019 | API session model | Not defined | DRF token authentication. The token lasts until logout. Login is rate-limited (default 10/min per client). | `config/settings.py` | TL-APPROVED DEFAULT |
 | CR-020 | Time zone for "today" | Not defined | Timestamps are stored in UTC. Clients send their local day as `scheduled_from`/`scheduled_to`, and the server `TIME_ZONE` is configurable. | `apps/appointments/filters.py` | TL-APPROVED DEFAULT |
 | CR-021 | Doctors register patients | Patient registration was a receptionist duty only | **Product owner decision (2026-09-26):** every doctor can register patients by default (`patients.add_patient` in the Doctor role). The patient is assigned to the registering doctor, the only doctor they are permitted for. Editing patients and booking appointments stay with reception. `business-logic/users-and-roles.md` is updated. | `apps/accounts/roles.py` | PO-APPROVED |
+| CR-022 | Doctors book appointments | Booking appointments was a receptionist duty only | **Product owner decision (2026-09-27):** every doctor can create appointments by default (`appointments.add_appointment` in the Doctor role). The doctor is selected automatically, and only their own patients can be booked. Check-in, rescheduling, cancelling and billing stay with reception. `business-logic/users-and-roles.md` is updated. | `apps/accounts/roles.py` | PO-APPROVED |
 
 ## Permission matrix
 
@@ -47,7 +48,7 @@ and permitted-doctor scoping, and ownership of the active visit.
 | Register patient (CR-021) | `patients.add_patient` | ✓ | | ✓ |
 | Edit patient | `patients.change_patient` | | | ✓ |
 | View appointments / queue | `appointments.view_appointment` | ✓ | ✓ | ✓ |
-| Create appointment | `appointments.add_appointment` | | | ✓ |
+| Create appointment (CR-022) | `appointments.add_appointment` | ✓ | | ✓ |
 | Edit / reschedule appointment | `appointments.change_appointment` | | | ✓ |
 | Check patient in | `appointments.check_in_appointment` | | | ✓ |
 | Cancel appointment | `appointments.cancel_appointment` | | | ✓ |

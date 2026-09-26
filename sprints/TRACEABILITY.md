@@ -37,6 +37,7 @@ exception: it is written but, by design, not verified.**
 | ROLE-003 | Receptionist: patient registration, appointments/check-in, queue state and payment recording, according to permissions | users-and-roles.md | 02, 03, 04, 06 | BE `accounts/tests/test_permissions.py`; API-QA `test_permissions.py`; E2E `reception.spec.ts` |
 | ROLE-004 | All access is scoped to the user's clinic and permitted doctors | users-and-roles.md, patients.md | 02–06 | BE scoping tests in every app; API-QA `test_permissions.py::test_cross_clinic_*`; E2E `permissions.spec.ts` |
 | ROLE-005 | Doctor can register patients; the patient is assigned to that doctor (CR-021) | users-and-roles.md | 08 | BE `accounts/tests/test_permissions.py::test_permission_matrix`, `patients/tests/test_api.py::test_doctor_registers_own_patient`, `::test_doctor_cannot_register_for_another_doctor`; API-QA `test_permissions.py::test_doctor_registers_patient_assigned_to_themself`, `test_auth.py`; E2E `doctor.spec.ts` (doctor registers a patient), `permissions.spec.ts` |
+| ROLE-006 | Doctor can book appointments for their own patients; the doctor is selected automatically (CR-022) | users-and-roles.md | 09 | BE `accounts/tests/test_permissions.py::test_permission_matrix`, `appointments/tests/test_api.py::test_doctor_books_own_patient`, `::test_doctor_cannot_book_for_another_doctor`, `::test_doctor_cannot_book_another_doctors_patient`; API-QA `test_permissions.py::test_doctor_books_appointments_for_own_patients_only`, `test_auth.py`; E2E `doctor.spec.ts`, `permissions.spec.ts` |
 
 ## Patients
 
@@ -111,6 +112,8 @@ exception: it is written but, by design, not verified.**
 | ADMIN-001 | Doctors have their own Django Admin page (`accounts.Doctor` proxy) | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_doctor_page_*`, `::test_admin_pages_load` |
 | ADMIN-002 | Django Admin uses the django-jazzmin theme | product owner, 2026-09-26 | 08 | BE `accounts/tests/test_admin.py::test_admin_pages_load` |
 | OPS-001 | Deployment to the production VM (nginx, gunicorn/systemd, HTTPS) | product owner, 2026-09-26 | 08 | `DEPLOY_TODO.md`, `deploy-details.txt`; health check in `backend/deploy/deploy.sh` and `web/deploy/deploy.sh` |
+| OPS-002 | Web/PWA shows its version and build commit | product owner, 2026-09-27 | 09 | Web `src/components/AppVersion.test.tsx` |
+| OPS-003 | Push to the deploy branch deploys automatically after CI passes | product owner, 2026-09-27 | 09 | `.github/workflows/ci.yml` (`deploy` job), `scripts/ci-deploy-forced-command.sh` |
 
 ## Coverage check
 

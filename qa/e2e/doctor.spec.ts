@@ -99,7 +99,7 @@ test.describe('Doctor visit', () => {
     await expect(page.getByRole('alert')).toHaveText('Not found.')
   })
 
-  test('doctor registers a patient, who is assigned to them automatically (CR-021)', async ({ page }) => {
+  test('doctor registers a patient and books an appointment for them (CR-021, CR-022)', async ({ page }) => {
     const name = uniqueName('DoctorReg')
     await loginAs(page, USERS.amal)
     await page.getByRole('link', { name: 'Register patient' }).click()
@@ -111,5 +111,13 @@ test.describe('Doctor visit', () => {
     await expect(page.getByRole('heading', { name })).toBeVisible()
     await expect(page.getByText('Patient saved.')).toBeVisible()
     await expect(page.locator('dt:has-text("Doctors") + dd')).toHaveText(USERS.amal.name)
+
+    await page.getByRole('link', { name: 'New appointment' }).click()
+    await expect(page.getByTestId('auto-doctor')).toContainText(USERS.amal.name)
+    // Check-in stays with reception, so no walk-in option.
+    await expect(page.getByLabel(/walk-in/)).toHaveCount(0)
+    await page.getByRole('button', { name: 'Create appointment' }).click()
+    await expect(statusBadge(page)).toHaveText('Scheduled')
+    await expect(page.getByText(`· ${USERS.amal.name}`)).toBeVisible()
   })
 })
