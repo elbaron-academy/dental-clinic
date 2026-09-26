@@ -11,11 +11,13 @@ SSH              : ssh dental            (alias in ~/.ssh/config -> hossam@34.12
 Git checkout     : /srv/dental-clinic/repo   (branch claude/adoring-goldberg-ye6g4m, HTTPS clone)
 System user      : dental-clinic         (runs the backend, builds the frontend; no login)
 
-DEPLOY (from your machine, after git push)
-------------------------------------------
-dental-deploy                 # alias -> scripts/deploy-to-server.sh
-                              # waits for CI on the pushed commit, pulls on the server,
-                              # deploys backend then frontend, and notifies you when finished
+DEPLOY
+------
+git push                      # on claude/adoring-goldberg-ye6g4m: CI tests, then its
+                              # "Deploy to production" job deploys the commit automatically
+dental-deploy                 # alias -> scripts/deploy-to-server.sh: waits for CI + deploy,
+                              # checks the server runs your commit, notifies you when finished
+                              # (deploys over SSH itself when CI did not deploy)
 dental-deploy --no-ci         # skip waiting for CI
 dental-deploy --backend-only | --web-only
 
@@ -55,6 +57,8 @@ Install path     : /srv/dental-clinic/web
   revision       : /srv/dental-clinic/web/current/REVISION
 systemd service  : none - nginx serves the files directly (nginx.service)
 API origin       : built with VITE_API_BASE_URL=https://api.dental.hossam-ameen.online
+Version shown    : "v<package.json version> · <commit>" on login pages and page footer
+                   (bump "version" in web/package.json for a release)
 nginx            : /etc/nginx/sites-available/dental.hossam-ameen.online.conf
                    /etc/nginx/dental-clinic/dental.hossam-ameen.online/web.conf
                    /etc/nginx/dental-clinic/security-headers.conf
@@ -75,7 +79,9 @@ sudoers          : /etc/sudoers.d/dental-ci-deploy
 Key restriction  : /home/deploy/.ssh/authorized_keys  (command="sudo /usr/local/sbin/dental-ci-deploy",restrict)
 Private key      : ~/.ssh/dental_github_actions on Hossam's laptop -> repo secret DEPLOY_SSH_KEY
 Client sends     : ssh deploy@34.123.215.195 "deploy <40-char sha on the deploy branch>"
-Repo secrets     : DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS
+Repo secrets     : DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS (added 2026-09-27)
+CI job           : "Deploy to production" in .github/workflows/ci.yml, after backend + web pass,
+                   only for pushes to claude/adoring-goldberg-ye6g4m; one deploy at a time
 
 HTTPS
 -----

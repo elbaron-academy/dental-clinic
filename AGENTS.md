@@ -27,10 +27,11 @@ Rejected work returns to the responsible agent with comments.
    backend (SQLite only, no PostgreSQL) and Web/PWA. The QA suites are not run
    in CI for now, but they are still kept up to date. The app is built and run
    only on the production server.
-3. When a change is finished: commit, push, then run `dental-deploy`
-   (`scripts/deploy-to-server.sh`). It waits for CI on the pushed commit,
-   deploys the backend and the Web/PWA on the server, checks the live sites,
-   and notifies when it has finished or failed. Report its result.
+3. When a change is finished: commit and push. On the deploy branch, CI's
+   "Deploy to production" job deploys every commit that passes. Then run
+   `dental-deploy` (`scripts/deploy-to-server.sh`): it waits for CI and the
+   deploy (or deploys over SSH when CI did not), checks that the server runs
+   the pushed commit, and notifies when it has finished or failed. Report its result.
 4. Server paths, service names and URLs are in `deploy-details.txt`.
    Server setup and operations are in `DEPLOY_TODO.md`.
 5. Any change to business behavior updates `business-logic/` (with Team

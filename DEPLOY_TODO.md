@@ -222,8 +222,8 @@ sudo web/deploy/deploy.sh --domain clinic.example.com --rollback
 - [x] Reserve a static IP (`dental-clinic-ip`, 2026-09-27).
 - [x] Create the `deploy` user on the VM. Its key can only run `/usr/local/sbin/dental-ci-deploy`
   (installed from `scripts/ci-deploy-forced-command.sh`), which deploys one commit of the deploy branch.
-- [ ] A repo admin adds the secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`.
-- [ ] Add the `deploy` job to `.github/workflows/ci.yml`. It runs after `backend` and `web`
+- [x] A repo admin adds the secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`.
+- [x] Add the `deploy` job to `.github/workflows/ci.yml`. It runs after `backend` and `web`
   pass on a push to the deploy branch, and runs `ssh deploy@$DEPLOY_HOST "deploy $GITHUB_SHA"`.
 - [ ] Optional: move production to a protected `main` branch, with a `production` environment that
   needs an approval. Update `BRANCH` in the forced command and reinstall it.

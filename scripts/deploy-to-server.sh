@@ -3,6 +3,9 @@
 #
 # Nothing is built or run locally: the server pulls from GitHub, then builds
 # and deploys the backend and the Web/PWA (see deploy-details.txt).
+# On the deploy branch, CI's "Deploy to production" job already deploys each
+# commit that passes; this script then only waits for it, checks the live
+# sites and notifies you. Otherwise (or with --no-ci) it deploys over SSH.
 #
 # Usage:
 #   scripts/deploy-to-server.sh [--no-ci] [--backend-only | --web-only]
@@ -78,23 +81,35 @@ if [[ $WAIT_CI -eq 1 ]]; then
   gh run watch "$run_id" --exit-status --interval 30 >/dev/null \
     || fail "CI failed for $SHORT: $(gh run view "$run_id" --json url --jq .url)"
   log "CI passed"
+  ci_deploy="$(gh run view "$run_id" --json jobs \
+    --jq '.jobs[] | select(.name == "Deploy to production") | .conclusion' 2>/dev/null || true)"
+  if [[ "$ci_deploy" == "success" && $DO_BACKEND -eq 1 && $DO_WEB -eq 1 ]]; then
+    log "CI deployed $SHORT"
+    DO_SSH=0
+  fi
 fi
 
-log "Deploying $SHORT ($BRANCH) to $SSH_HOST"
-remote="set -euo pipefail
+if [[ ${DO_SSH:-1} -eq 1 ]]; then
+  log "Deploying $SHORT ($BRANCH) to $SSH_HOST"
+  remote="set -euo pipefail
 cd '$REPO_DIR'
 git fetch --quiet origin
 git checkout --quiet '$BRANCH'
 git reset --hard --quiet '$SHA'
 "
-[[ $DO_BACKEND -eq 1 ]] && remote+="sudo backend/deploy/deploy.sh --domain '$API_DOMAIN'
+  [[ $DO_BACKEND -eq 1 ]] && remote+="sudo backend/deploy/deploy.sh --domain '$API_DOMAIN'
 "
-[[ $DO_WEB -eq 1 ]] && remote+="sudo web/deploy/deploy.sh --domain '$WEB_DOMAIN' --api-url 'https://$API_DOMAIN'
+  [[ $DO_WEB -eq 1 ]] && remote+="sudo web/deploy/deploy.sh --domain '$WEB_DOMAIN' --api-url 'https://$API_DOMAIN'
 "
-ssh "$SSH_HOST" "bash -c $(printf '%q' "$remote")" || fail "deploy of $SHORT failed on the server (see output above)"
+  ssh "$SSH_HOST" "bash -c $(printf '%q' "$remote")" || fail "deploy of $SHORT failed on the server (see output above)"
+fi
 
 log "Checking the live sites"
 [[ $DO_BACKEND -eq 1 ]] && { curl -fsS -o /dev/null "https://$API_DOMAIN/api/health/" || fail "API health check failed"; }
 [[ $DO_WEB -eq 1 ]] && { curl -fsS -o /dev/null "https://$WEB_DOMAIN/" || fail "PWA is not reachable"; }
+if [[ $DO_BACKEND -eq 1 && $DO_WEB -eq 1 ]]; then
+  live="$(ssh "$SSH_HOST" 'cut -c1-7 /srv/dental-clinic/{backend,web}/current/REVISION' 2>/dev/null | sort -u | tr '\n' ' ')"
+  [[ "$live" == "$SHORT " ]] || fail "server runs ${live:-unknown}, expected $SHORT"
+fi
 
 notify OK "$SHORT is live on https://$WEB_DOMAIN and https://$API_DOMAIN"

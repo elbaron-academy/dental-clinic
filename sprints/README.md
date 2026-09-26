@@ -22,6 +22,7 @@ BACKLOG -> IN_PROGRESS -> READY_FOR_REVIEW -> CHANGES_REQUESTED/APPROVED -> READ
 | [06](sprint-06-payments.md) | Payments | DONE (QA_PASSED) |
 | [07](sprint-07-qa-release.md) | QA and release gate | DONE |
 | [08](sprint-08-doctor-registration-admin-deploy.md) | Doctor registers patients, Doctors admin page, admin theme, production deploy | READY_FOR_QA (CI) |
+| [09](sprint-09-doctor-booking-version-cd.md) | Doctor books appointments, app version, continuous deployment | READY_FOR_QA (CI) |
 
 Requirement IDs and verification: [TRACEABILITY.md](TRACEABILITY.md).
 Gaps and approved defaults: [../docs/DECISIONS.md](../docs/DECISIONS.md).
