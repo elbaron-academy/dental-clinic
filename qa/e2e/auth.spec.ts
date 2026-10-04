@@ -28,6 +28,17 @@ test.describe('Authentication and role-aware routing', () => {
     await expect(page.getByLabel(/username/i)).toHaveCount(0)
   })
 
+  test('toggle password visibility shows and hides password text', async ({ page }) => {
+    await page.goto('/login/doctor')
+    const passwordInput = page.getByLabel('Password')
+    const toggleBtn = page.getByRole('button', { name: 'Show password' })
+    await expect(passwordInput).toHaveAttribute('type', 'password')
+    await toggleBtn.click()
+    await expect(passwordInput).toHaveAttribute('type', 'text')
+    await page.getByRole('button', { name: 'Hide password' }).click()
+    await expect(passwordInput).toHaveAttribute('type', 'password')
+  })
+
   test('wrong password shows an error', async ({ page }) => {
     await page.goto('/login/reception')
     await page.getByLabel('Phone number').fill(USERS.rana.phone)

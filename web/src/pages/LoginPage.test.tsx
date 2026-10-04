@@ -89,4 +89,19 @@ describe('role login pages (AUTH-001, S02-PWA-01..03)', () => {
     renderLogin('/login/admin')
     expect(screen.getByText('Login chooser')).toBeInTheDocument()
   })
+
+  it('toggles password visibility when eye icon button is clicked', async () => {
+    mockApi({})
+    renderLogin('/login/doctor')
+    const passwordInput = screen.getByLabelText(/Password/)
+    const toggleButton = screen.getByRole('button', { name: 'Show password' })
+
+    expect(passwordInput).toHaveAttribute('type', 'password')
+    await userEvent.click(toggleButton)
+    expect(passwordInput).toHaveAttribute('type', 'text')
+    expect(screen.getByRole('button', { name: 'Hide password' })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Hide password' }))
+    expect(passwordInput).toHaveAttribute('type', 'password')
+  })
 })

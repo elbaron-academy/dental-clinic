@@ -668,6 +668,45 @@ textarea {
   border-color: var(--danger);
 }
 
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrap input {
+  padding-right: 2.75rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0.35rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+  background: var(--brand-soft);
+}
+
+.password-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  color: var(--text);
+}
+
 .fieldset {
   border: 1px solid var(--border);
   border-radius: 10px;
