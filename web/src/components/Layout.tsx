@@ -4,6 +4,7 @@ import { ROLES } from '../auth/roles'
 import { InstallButton } from './InstallButton'
 import { OfflineBanner } from './OfflineBanner'
 import { AppVersion } from './AppVersion'
+import { ProductTour } from './ProductTour'
 
 export function Logo() {
   return (
@@ -33,7 +34,7 @@ export function Layout() {
       <OfflineBanner />
       <header className="topbar">
         <div className="topbar-inner">
-          <NavLink to={role.home} className="brand">
+          <NavLink to={role.home} className="brand" data-tour="brand">
             <Logo />
             <span>
               <strong>{user.clinic.name}</strong>
@@ -42,14 +43,20 @@ export function Layout() {
               </small>
             </span>
           </NavLink>
-          <nav className="nav" aria-label="Main">
+          <nav className="nav" aria-label="Main" data-tour="nav">
             {links.map((link) => (
-              <NavLink key={link.to} to={link.to} end={link.to === role.home}>
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.to === role.home}
+                data-tour={`nav-${link.label.toLowerCase()}`}
+              >
                 {link.label}
               </NavLink>
             ))}
           </nav>
-          <div className="user-menu">
+          <div className="user-menu" data-tour="user-menu">
+            <ProductTour />
             <InstallButton />
             <span className="user-name">
               {user.full_name} <span className="badge badge-role">{user.role_display}</span>

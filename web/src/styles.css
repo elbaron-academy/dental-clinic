@@ -153,6 +153,61 @@ h3 {
   font-size: 0.9rem;
 }
 
+.product-tour {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.tour-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgb(15 31 29 / 40%);
+  backdrop-filter: blur(2px);
+}
+
+.tour-card {
+  position: fixed;
+  right: max(1rem, calc((100vw - 1200px) / 2 + 1rem));
+  top: 5.25rem;
+  z-index: 90;
+  width: min(92vw, 380px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 24px 48px rgb(16 24 40 / 24%);
+  padding: 1rem;
+}
+
+.tour-card h2 {
+  margin-top: 0.25rem;
+}
+
+.tour-card p {
+  color: var(--muted);
+  margin: 0.5rem 0 0;
+}
+
+.tour-progress {
+  color: var(--brand-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+[data-tour] {
+  scroll-margin: 6rem;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -518,6 +573,15 @@ a:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .tour-card {
+    inset: auto 0.75rem 0.75rem;
+    width: auto;
+  }
+
+  .tour-actions .btn {
+    flex: 1 1 auto;
+  }
+
   .modal-backdrop {
     align-items: flex-end;
   }
@@ -534,7 +598,9 @@ a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .alert,
   .modal,
-  .modal-backdrop {
+  .modal-backdrop,
+  .tour-card,
+  .tour-scrim {
     animation: none;
   }
 }
