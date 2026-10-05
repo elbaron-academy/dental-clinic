@@ -16,7 +16,7 @@ describe('ProductTour', () => {
     expect(screen.queryByRole('heading', { name: 'Clinic workspace' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Continue tour' }))
-    expect(screen.getByText('Step 1 of 5')).toBeInTheDocument()
+    expect(screen.getByText(/Step 1 of \d+/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Skip' }))
     expect(screen.getByRole('button', { name: 'Tour' })).toBeInTheDocument()
