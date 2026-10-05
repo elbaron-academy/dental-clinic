@@ -48,7 +48,7 @@ export function AppointmentsPage() {
           )
         }
       />
-      <Card>
+      <Card data-tour="appointments-content">
         <div className="toolbar">
           <input type="date" aria-label="Day" value={day} onChange={(event) => event.target.value && setDay(event.target.value)} />
           {user.permitted_doctors.length > 1 && (

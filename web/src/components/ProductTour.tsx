@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth, useUser } from '../auth/context'
 
 const TOUR_KEY = 'dental-clinic.product-tour.v1'
@@ -15,6 +15,7 @@ interface TourStep {
   target: string
   title: string
   body: string
+  page?: string
 }
 
 const DEFAULT_STATE: TourState = { status: 'new', step: 0 }
@@ -39,6 +40,7 @@ export function ProductTour() {
   const { hasPerm } = useAuth()
   const user = useUser()
   const location = useLocation()
+  const navigate = useNavigate()
   const [state, setState] = useState<TourState>(() => readTourState())
 
   const steps = useMemo<TourStep[]>(() => {
@@ -69,11 +71,20 @@ export function ProductTour() {
     }
 
     if (hasPerm('appointments.view_appointment')) {
-      items.splice(3, 0, {
-        target: '[data-tour="nav-appointments"]',
-        title: 'Appointments',
-        body: 'Open the appointment schedule to manage booking, check-in, and appointment details.',
-      })
+      items.splice(3, 0,
+        {
+          target: '[data-tour="nav-appointments"]',
+          title: 'Appointments',
+          body: 'Open the appointment schedule to manage booking, check-in, and appointment details.',
+          page: '/appointments',
+        },
+        {
+          target: '[data-tour="appointments-content"]',
+          title: 'Appointments Page',
+          body: 'Here you can view and manage all appointments. Use the calendar or list to check-in patients and update appointment details.',
+          page: '/appointments',
+        },
+      )
     }
 
     return items
@@ -92,6 +103,10 @@ export function ProductTour() {
 
   useEffect(() => {
     if (!isActive || !activeStep) return
+    if (activeStep.page && location.pathname !== activeStep.page) {
+      navigate(activeStep.page)
+      return
+    }
     const target = document.querySelector(activeStep.target)
     if (target && 'scrollIntoView' in target) {
       target.scrollIntoView({ block: 'center', inline: 'center' })
@@ -100,7 +115,7 @@ export function ProductTour() {
     return () => {
       document.querySelectorAll('[data-tour-active]').forEach(el => el.removeAttribute('data-tour-active'))
     }
-  }, [activeStep, isActive, location.pathname])
+  }, [activeStep, isActive, location.pathname, navigate])
 
   const start = () => setState({ status: 'active', step: Math.min(state.step, steps.length - 1) })
   const pause = () => setState((current) => ({ ...current, status: 'paused' }))

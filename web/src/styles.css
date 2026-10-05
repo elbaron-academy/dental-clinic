@@ -212,16 +212,34 @@ h3 {
   position: relative;
   z-index: 85;
   border-radius: 8px;
-  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--brand), inset 0 0 0 1px var(--brand), 0 0 20px rgb(15 118 110 / 40%);
-  animation: tour-pulse 2s ease-in-out infinite;
+  box-shadow:
+    0 0 0 4px var(--surface),
+    0 0 0 8px var(--brand),
+    0 0 0 9px var(--brand-soft),
+    inset 0 0 0 2px var(--brand),
+    0 0 25px rgb(15 118 110 / 50%),
+    0 0 40px rgb(15 118 110 / 30%);
+  animation: tour-pulse 2.5s ease-in-out infinite;
 }
 
 @keyframes tour-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--brand), inset 0 0 0 1px var(--brand), 0 0 20px rgb(15 118 110 / 40%);
+    box-shadow:
+      0 0 0 4px var(--surface),
+      0 0 0 8px var(--brand),
+      0 0 0 9px var(--brand-soft),
+      inset 0 0 0 2px var(--brand),
+      0 0 25px rgb(15 118 110 / 50%),
+      0 0 40px rgb(15 118 110 / 30%);
   }
   50% {
-    box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--brand), inset 0 0 0 1px var(--brand), 0 0 30px rgb(15 118 110 / 60%);
+    box-shadow:
+      0 0 0 4px var(--surface),
+      0 0 0 8px var(--brand),
+      0 0 0 9px var(--brand-soft),
+      inset 0 0 0 2px var(--brand),
+      0 0 35px rgb(15 118 110 / 70%),
+      0 0 60px rgb(15 118 110 / 50%);
   }
 }
 
