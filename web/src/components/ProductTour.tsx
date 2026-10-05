@@ -95,6 +95,10 @@ export function ProductTour() {
     const target = document.querySelector(activeStep.target)
     if (target && 'scrollIntoView' in target) {
       target.scrollIntoView({ block: 'center', inline: 'center' })
+      target.setAttribute('data-tour-active', 'true')
+    }
+    return () => {
+      document.querySelectorAll('[data-tour-active]').forEach(el => el.removeAttribute('data-tour-active'))
     }
   }, [activeStep, isActive, location.pathname])
 
