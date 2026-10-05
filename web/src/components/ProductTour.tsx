@@ -89,11 +89,6 @@ export function ProductTour() {
     saveTourState(state)
   }, [state])
 
-  useEffect(() => {
-    if (state.step >= steps.length) {
-      setState({ status: 'done', step: steps.length - 1 })
-    }
-  }, [state.step, steps.length])
 
   useEffect(() => {
     if (!isActive || !activeStep) return
