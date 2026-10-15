@@ -20,13 +20,18 @@ interface TourStep {
 
 const CARD_GAP = 14
 const EDGE = 12
-const MOBILE_WIDTH = 640
+
+interface CardPosition {
+  top: number
+  left: number
+  width: number
+}
 
 /** Puts the card just under the highlighted element (or above it when there is no room). */
-function placeCard(target: Element, card: HTMLElement): { top: number; left: number } | null {
-  if (window.innerWidth <= MOBILE_WIDTH) return null
+function placeCard(target: Element, card: HTMLElement): CardPosition {
   const rect = target.getBoundingClientRect()
-  const { width, height } = card.getBoundingClientRect()
+  const { height } = card.getBoundingClientRect()
+  const width = Math.min(380, window.innerWidth - EDGE * 2)
   const left = Math.min(Math.max(rect.left, EDGE), window.innerWidth - width - EDGE)
   const below = rect.bottom + CARD_GAP
   const above = rect.top - CARD_GAP - height
@@ -35,7 +40,7 @@ function placeCard(target: Element, card: HTMLElement): { top: number; left: num
     // Not enough room below: go above, or stay in view next to a tall target.
     top = above >= EDGE ? above : Math.max(EDGE, window.innerHeight - height - EDGE)
   }
-  return { top, left }
+  return { top, left, width }
 }
 
 const DEFAULT_STATE: TourState = { status: 'new', step: 0 }
@@ -62,7 +67,7 @@ export function ProductTour() {
   const location = useLocation()
   const navigate = useNavigate()
   const [state, setState] = useState<TourState>(() => readTourState())
-  const [cardPos, setCardPos] = useState<{ top: number; left: number } | null>(null)
+  const [cardPos, setCardPos] = useState<CardPosition | null>(null)
   const cardRef = useRef<HTMLElement>(null)
 
   const steps = useMemo<TourStep[]>(() => {
@@ -195,7 +200,7 @@ export function ProductTour() {
             className="tour-card"
             aria-live="polite"
             aria-label="Product tour"
-            style={cardPos ? { top: cardPos.top, left: cardPos.left, right: 'auto' } : undefined}
+            style={cardPos ? { ...cardPos, right: 'auto', bottom: 'auto' } : undefined}
           >
             <div className="tour-progress">
               Step {state.step + 1} of {steps.length}
