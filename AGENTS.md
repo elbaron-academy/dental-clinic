@@ -23,6 +23,8 @@ Rejected work returns to the responsible agent with comments.
 ## Run and deploy policy (overrides any skill that says to run things locally)
 1. Do not run anything on the local machine: no dev servers, tests, linters,
    type checks, builds, migrations or `manage.py` commands. Only read and edit code.
+   **Exception:** before every push that includes Python changes, run the
+   `skills/pre-push-lint` skill (ruff check + ruff format --check, same as CI).
 2. Tests run in GitHub Actions CI (`.github/workflows/ci.yml`) on every push:
    backend (SQLite only, no PostgreSQL) and Web/PWA. The QA suites are not run
    in CI for now, but they are still kept up to date. The app is built and run
