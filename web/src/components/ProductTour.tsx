@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth, useUser } from '../auth/context'
 
@@ -16,6 +16,26 @@ interface TourStep {
   title: string
   body: string
   page?: string
+}
+
+const CARD_GAP = 14
+const EDGE = 12
+const MOBILE_WIDTH = 640
+
+/** Puts the card just under the highlighted element (or above it when there is no room). */
+function placeCard(target: Element, card: HTMLElement): { top: number; left: number } | null {
+  if (window.innerWidth <= MOBILE_WIDTH) return null
+  const rect = target.getBoundingClientRect()
+  const { width, height } = card.getBoundingClientRect()
+  const left = Math.min(Math.max(rect.left, EDGE), window.innerWidth - width - EDGE)
+  const below = rect.bottom + CARD_GAP
+  const above = rect.top - CARD_GAP - height
+  let top = below
+  if (below + height > window.innerHeight - EDGE) {
+    // Not enough room below: go above, or stay in view next to a tall target.
+    top = above >= EDGE ? above : Math.max(EDGE, window.innerHeight - height - EDGE)
+  }
+  return { top, left }
 }
 
 const DEFAULT_STATE: TourState = { status: 'new', step: 0 }
@@ -42,6 +62,8 @@ export function ProductTour() {
   const location = useLocation()
   const navigate = useNavigate()
   const [state, setState] = useState<TourState>(() => readTourState())
+  const [cardPos, setCardPos] = useState<{ top: number; left: number } | null>(null)
+  const cardRef = useRef<HTMLElement>(null)
 
   const steps = useMemo<TourStep[]>(() => {
     const items: TourStep[] = [
@@ -117,6 +139,25 @@ export function ProductTour() {
     }
   }, [activeStep, isActive, location.pathname, navigate])
 
+  const reposition = useCallback(() => {
+    const target = activeStep ? document.querySelector(activeStep.target) : null
+    const card = cardRef.current
+    setCardPos(target && card ? placeCard(target, card) : null)
+  }, [activeStep])
+
+  useLayoutEffect(() => {
+    if (!isActive) return
+    reposition()
+    const settle = window.setTimeout(reposition, 200) // page change or scroll may still be settling
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
+    return () => {
+      window.clearTimeout(settle)
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
+    }
+  }, [isActive, reposition, location.pathname])
+
   const start = () => setState({ status: 'active', step: Math.min(state.step, steps.length - 1) })
   const pause = () => setState((current) => ({ ...current, status: 'paused' }))
   const skip = () => setState((current) => ({ ...current, status: 'skipped' }))
@@ -149,7 +190,13 @@ export function ProductTour() {
       {isActive && activeStep && (
         <>
           <div className="tour-scrim" aria-hidden="true" />
-          <section className="tour-card" aria-live="polite" aria-label="Product tour">
+          <section
+            ref={cardRef}
+            className="tour-card"
+            aria-live="polite"
+            aria-label="Product tour"
+            style={cardPos ? { top: cardPos.top, left: cardPos.left, right: 'auto' } : undefined}
+          >
             <div className="tour-progress">
               Step {state.step + 1} of {steps.length}
             </div>
