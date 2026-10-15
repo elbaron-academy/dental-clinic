@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 error_messages={"unique": "A user with this username already exists."},
-                help_text="Optional. An alternative to the phone number when signing in. Not case-sensitive.",
+                help_text="Optional. Sign in with it instead of the phone number. Not case-sensitive.",
                 max_length=32,
                 null=True,
                 unique=True,

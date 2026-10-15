@@ -73,7 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True,
         validators=[validate_username],
-        help_text="Optional. An alternative to the phone number when signing in. Not case-sensitive.",
+        help_text="Optional. Sign in with it instead of the phone number. Not case-sensitive.",
         error_messages={"unique": "A user with this username already exists."},
     )
     full_name = models.CharField(max_length=150)

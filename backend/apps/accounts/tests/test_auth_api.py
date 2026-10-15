@@ -75,9 +75,7 @@ def test_identifier_accepts_phone(api_client, doctor):
 
 def test_phone_key_still_accepts_a_username(api_client, clinic):
     testing.make_user(Role.DOCTOR, clinic, username="amal")
-    response = api_client.post(
-        LOGIN_URL, {"phone": "amal", "password": testing.DEFAULT_PASSWORD}
-    )
+    response = api_client.post(LOGIN_URL, {"phone": "amal", "password": testing.DEFAULT_PASSWORD})
     assert response.status_code == 200
 
 
