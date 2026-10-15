@@ -58,7 +58,7 @@ class UserChangeForm(ClinicRoleFormMixin, DjangoUserChangeForm):
 class UserAdmin(DjangoUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
-    list_display = ("full_name", "phone", "role", "clinic", "is_active", "is_staff")
+    list_display = ("full_name", "username", "phone", "role", "clinic", "is_active", "is_staff")
     list_filter = ("role", "clinic", "is_active", "is_staff")
     search_fields = ("full_name", "phone", "username")
     ordering = ("full_name",)
@@ -130,7 +130,7 @@ class DoctorAdmin(UserAdmin):
 
     form = DoctorChangeForm
     add_form = DoctorCreationForm
-    list_display = ("full_name", "phone", "clinic", "patient_count", "is_active")
+    list_display = ("full_name", "username", "phone", "clinic", "patient_count", "is_active")
     list_filter = ("clinic", "is_active")
     filter_horizontal = ("groups", "user_permissions")
     fieldsets = (
