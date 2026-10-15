@@ -22,8 +22,9 @@ import type {
 } from './types'
 
 // Authentication (Sprint 02)
-export const login = (phone: string, password: string, role?: Role) =>
-  apiRequest<LoginResponse>('/auth/login/', { method: 'POST', body: { phone, password, role } })
+/** `identifier` is the user's username or phone number (AUTH-001). */
+export const login = (identifier: string, password: string, role?: Role) =>
+  apiRequest<LoginResponse>('/auth/login/', { method: 'POST', body: { identifier, password, role } })
 export const logout = () => apiRequest<void>('/auth/logout/', { method: 'POST' })
 export const getMe = () => apiRequest<Me>('/auth/me/')
 export const getDoctors = () => apiRequest<DoctorSummary[]>('/doctors/')

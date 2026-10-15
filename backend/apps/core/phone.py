@@ -15,6 +15,10 @@ def normalize_phone(value: str | None) -> str:
     return _SEPARATORS.sub("", str(value).strip())
 
 
+def looks_like_phone(value: str | None) -> bool:
+    return bool(_VALID.match(normalize_phone(value)))
+
+
 def validate_phone(value: str) -> None:
     if not _VALID.match(normalize_phone(value)):
         raise ValidationError(

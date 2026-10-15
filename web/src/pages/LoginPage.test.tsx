@@ -34,8 +34,7 @@ describe('role login pages (AUTH-001, S02-PWA-01..03)', () => {
     mockApi({})
     renderLogin(path)
     expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument()
-    expect(screen.getByLabelText(/Phone number/)).toHaveAttribute('type', 'tel')
-    expect(screen.queryByLabelText(/username/i)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/Username or phone number/)).toHaveAttribute('type', 'text')
   })
 
   it('logs in with phone + password + role and opens the role home', async () => {
@@ -44,12 +43,37 @@ describe('role login pages (AUTH-001, S02-PWA-01..03)', () => {
       'POST /api/auth/login/': () => ({ body: { token: 'tok', user: doctor } }),
     })
     renderLogin('/login/doctor')
-    await userEvent.type(screen.getByLabelText(/Phone number/), '01000000001')
+    await userEvent.type(screen.getByLabelText(/Username or phone number/), '01000000001')
     await userEvent.type(screen.getByLabelText(/Password/), 'secret-pass')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByText('Doctor home')).toBeInTheDocument()
-    expect(calls[0].body).toEqual({ phone: '01000000001', password: 'secret-pass', role: 'DOCTOR' })
+    expect(calls[0].body).toEqual({ identifier: '01000000001', password: 'secret-pass', role: 'DOCTOR' })
     expect(localStorage.getItem('dental-clinic.token')).toBe('tok')
+  })
+
+  it('logs in with a username and trims it', async () => {
+    const doctor = makeUser({ role: 'DOCTOR', role_display: 'Doctor', full_name: 'Dr. Amal' })
+    const { calls } = mockApi({
+      'POST /api/auth/login/': () => ({ body: { token: 'tok', user: doctor } }),
+    })
+    renderLogin('/login/doctor')
+    await userEvent.type(screen.getByLabelText(/Username or phone number/), '  dr.amal ')
+    await userEvent.type(screen.getByLabelText(/Password/), 'secret-pass')
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    expect(await screen.findByText('Doctor home')).toBeInTheDocument()
+    expect(calls[0].body).toEqual({ identifier: 'dr.amal', password: 'secret-pass', role: 'DOCTOR' })
+  })
+
+  it('keeps Sign in disabled until identifier and password are filled', async () => {
+    mockApi({})
+    renderLogin('/login/doctor')
+    const button = screen.getByRole('button', { name: 'Sign in' })
+    expect(button).toBeDisabled()
+    await userEvent.type(screen.getByLabelText(/Username or phone number/), '   ')
+    await userEvent.type(screen.getByLabelText(/Password/), 'x')
+    expect(button).toBeDisabled()
+    await userEvent.type(screen.getByLabelText(/Username or phone number/), 'amal')
+    expect(button).toBeEnabled()
   })
 
   it('shows the server message when the account belongs to another portal', async () => {
@@ -63,7 +87,7 @@ describe('role login pages (AUTH-001, S02-PWA-01..03)', () => {
       }),
     })
     renderLogin('/login/doctor')
-    await userEvent.type(screen.getByLabelText(/Phone number/), '01000000004')
+    await userEvent.type(screen.getByLabelText(/Username or phone number/), '01000000004')
     await userEvent.type(screen.getByLabelText(/Password/), 'secret-pass')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Receptionist login page')
@@ -74,14 +98,14 @@ describe('role login pages (AUTH-001, S02-PWA-01..03)', () => {
     mockApi({
       'POST /api/auth/login/': () => ({
         status: 400,
-        body: { detail: 'Invalid phone number or password.', code: 'invalid_credentials' },
+        body: { detail: 'Invalid username, phone number or password.', code: 'invalid_credentials' },
       }),
     })
     renderLogin('/login/reception')
-    await userEvent.type(screen.getByLabelText(/Phone number/), '0100')
+    await userEvent.type(screen.getByLabelText(/Username or phone number/), '0100')
     await userEvent.type(screen.getByLabelText(/Password/), 'x')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid phone number or password.')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid username, phone number or password.')
   })
 
   it('unknown portals go back to the chooser', () => {

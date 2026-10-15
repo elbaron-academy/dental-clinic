@@ -13,7 +13,7 @@ export function LoginChooser() {
         <div className="auth-brand">
           <Logo />
           <h1>Dental Clinic</h1>
-          <p className="muted">Choose your portal to sign in with your phone number.</p>
+          <p className="muted">Choose your portal to sign in with your username or phone number.</p>
         </div>
         <ul className="portal-list">
           {ROLE_LIST.map((info) => (

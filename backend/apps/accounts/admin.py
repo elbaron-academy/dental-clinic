@@ -45,7 +45,7 @@ class ClinicRoleFormMixin:
 class UserCreationForm(ClinicRoleFormMixin, BaseUserCreationForm):
     class Meta:
         model = User
-        fields = ("phone", "full_name", "clinic", "role", "assigned_doctors")
+        fields = ("phone", "username", "full_name", "clinic", "role", "assigned_doctors")
 
 
 class UserChangeForm(ClinicRoleFormMixin, DjangoUserChangeForm):
@@ -60,11 +60,11 @@ class UserAdmin(DjangoUserAdmin):
     add_form = UserCreationForm
     list_display = ("full_name", "phone", "role", "clinic", "is_active", "is_staff")
     list_filter = ("role", "clinic", "is_active", "is_staff")
-    search_fields = ("full_name", "phone")
+    search_fields = ("full_name", "phone", "username")
     ordering = ("full_name",)
     filter_horizontal = ("assigned_doctors", "groups", "user_permissions")
     fieldsets = (
-        (None, {"fields": ("phone", "password")}),
+        (None, {"fields": ("phone", "username", "password")}),
         ("Profile", {"fields": ("full_name",)}),
         ("Clinic role", {"fields": ("clinic", "role", "assigned_doctors")}),
         (
@@ -87,6 +87,7 @@ class UserAdmin(DjangoUserAdmin):
                 "classes": ("wide",),
                 "fields": (
                     "phone",
+                    "username",
                     "full_name",
                     "clinic",
                     "role",
@@ -114,7 +115,7 @@ class DoctorFormMixin:
 class DoctorCreationForm(DoctorFormMixin, BaseUserCreationForm):
     class Meta:
         model = Doctor
-        fields = ("phone", "full_name", "clinic")
+        fields = ("phone", "username", "full_name", "clinic")
 
 
 class DoctorChangeForm(DoctorFormMixin, DjangoUserChangeForm):
@@ -133,7 +134,7 @@ class DoctorAdmin(UserAdmin):
     list_filter = ("clinic", "is_active")
     filter_horizontal = ("groups", "user_permissions")
     fieldsets = (
-        (None, {"fields": ("phone", "password")}),
+        (None, {"fields": ("phone", "username", "password")}),
         ("Profile", {"fields": ("full_name", "clinic")}),
         (
             "Extra permissions",
@@ -153,7 +154,7 @@ class DoctorAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("phone", "full_name", "clinic", "password1", "password2"),
+                "fields": ("phone", "username", "full_name", "clinic", "password1", "password2"),
             },
         ),
     )

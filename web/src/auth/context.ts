@@ -6,7 +6,7 @@ export type AuthStatus = 'loading' | 'authenticated' | 'anonymous'
 export interface AuthContextValue {
   status: AuthStatus
   user: Me | null
-  login: (phone: string, password: string, role: Role) => Promise<Me>
+  login: (identifier: string, password: string, role: Role) => Promise<Me>
   logout: () => Promise<void>
   hasPerm: (...perms: string[]) => boolean
   /** Signed out because the session expired or was revoked elsewhere. */

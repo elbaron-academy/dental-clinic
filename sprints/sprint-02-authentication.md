@@ -3,9 +3,9 @@
 Status: DONE (QA_PASSED)
 
 ## Requirements
-- AUTH-001: Login by phone number + password.
+- AUTH-001: Login by username or phone number + password (username added by CR-025).
 - AUTH-002: Role-aware access.
-- AUTH-003: No username login, no "foreign password" flow.
+- AUTH-003: No "foreign password" flow. (Username login is allowed since CR-025.)
 - ROLE-001: Doctor role.
 - ROLE-002: Assistant role.
 - ROLE-003: Receptionist role.
@@ -35,6 +35,9 @@ Flutter:
 QA:
 - S02-QA-01 Automated authentication tests.
 - S02-QA-02 Web/PWA login and role-flow testing.
+
+## Change log
+- CR-025 (v1.7.0): optional `User.username`; login by username or phone (`accounts/migrations/0003_user_username.py`, `LoginPage.tsx`, `qa/api/test_auth.py`, `qa/e2e/auth.spec.ts`). Needs QA re-run.
 
 ## Delivery
 | Layer | Where |

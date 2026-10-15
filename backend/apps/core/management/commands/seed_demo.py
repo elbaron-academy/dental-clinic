@@ -17,6 +17,13 @@ from apps.clinics.models import Clinic
 
 DEMO_PASSWORD = "demo-pass-123"
 
+# Demo accounts that can also sign in with a username (AUTH-001).
+DEMO_USERNAMES = {
+    "01000000001": "dr.amal",
+    "01000000003": "sara",
+    "01000000004": "rana",
+}
+
 CLINICS = {
     "Smile Dental Center": {
         "users": [
@@ -90,6 +97,9 @@ class Command(BaseCommand):
                 if created:
                     user.set_password(password)
                     user.save()
+                if phone in DEMO_USERNAMES and not user.username:
+                    user.username = DEMO_USERNAMES[phone]
+                    user.save(update_fields=["username"])
                 if doctor_phones:
                     user.assigned_doctors.set(User.objects.filter(phone__in=doctor_phones))
 

@@ -29,9 +29,9 @@ exception: it is written but, by design, not verified.**
 
 | ID | Requirement | Source | Sprint | Verification |
 |---|---|---|---|---|
-| AUTH-001 | All users log in with phone number + password | authentication.md | 02 | BE `accounts/tests/test_auth_api.py`; API-QA `test_auth.py`; E2E `auth.spec.ts` |
+| AUTH-001 | All users log in with username or phone number + password (CR-025) | authentication.md | 02 | BE `accounts/tests/test_auth_api.py`; API-QA `test_auth.py`; E2E `auth.spec.ts` |
 | AUTH-002 | After login, role and permissions determine access | authentication.md | 02 | BE `accounts/tests/test_permissions.py`; API-QA `test_permissions.py`; E2E `auth.spec.ts`, `permissions.spec.ts` |
-| AUTH-003 | No username login and no separate "foreign password" flow | authentication.md | 02 | BE `accounts/tests/test_auth_api.py::test_username_field_is_not_accepted`; API-QA `test_auth.py` |
+| AUTH-003 | No separate "foreign password" flow (username login allowed by CR-025) | authentication.md | 02 | BE `accounts/tests/test_auth_api.py::test_user_logs_in_with_username`; API-QA `test_auth.py::test_username_login`; E2E `auth.spec.ts` |
 | ROLE-001 | Doctor: accesses assigned patient records and manages clinical visit information | users-and-roles.md | 02, 05 | BE `accounts/tests/test_permissions.py`, `visits/tests/test_api.py`; API-QA `test_permissions.py` |
 | ROLE-002 | Assistant: accesses patients/doctors permitted by their assignment | users-and-roles.md | 02, 03 | BE `accounts/tests/test_permissions.py`, `patients/tests/test_api.py`; API-QA `test_permissions.py`; E2E `permissions.spec.ts` |
 | ROLE-003 | Receptionist: patient registration, appointments/check-in, queue state and payment recording, according to permissions | users-and-roles.md | 02, 03, 04, 06 | BE `accounts/tests/test_permissions.py`; API-QA `test_permissions.py`; E2E `reception.spec.ts` |
@@ -137,7 +137,7 @@ missing from the original sprint files and have been added:
 | Requirement | Was missing from | Added to |
 |---|---|---|
 | CLINIC-001 clinic/doctor setup | all sprints | Sprint 02 |
-| AUTH-003 no username / foreign password | Sprint 02 | Sprint 02 (negative tests) |
+| AUTH-003 foreign password / username login (CR-025) | Sprint 02 | Sprint 02 |
 | ROLE-004 clinic + doctor scoping | only implicit | Sprints 02–06 |
 | DX-001, DX-002, MED-001 catalog in Django Admin | Sprint 05 | Sprint 05 |
 | LIFE-001..003 lifecycle | only implicit | Sprints 04–06, accepted in 07 |

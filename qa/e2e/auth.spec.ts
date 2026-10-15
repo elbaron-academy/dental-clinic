@@ -21,11 +21,33 @@ test.describe('Authentication and role-aware routing', () => {
     })
   }
 
-  test('login form has phone and password only (no username)', async ({ page }) => {
+  test('login form takes a username or phone number and a password', async ({ page }) => {
     await page.goto('/login/doctor')
-    await expect(page.getByLabel('Phone number')).toHaveAttribute('type', 'tel')
+    await expect(page.getByLabel('Username or phone number')).toHaveAttribute('type', 'text')
     await expect(page.getByLabel('Password')).toHaveAttribute('type', 'password')
-    await expect(page.getByLabel(/username/i)).toHaveCount(0)
+  })
+
+  for (const [portal, username, name] of [
+    ['doctor', 'dr.amal', USERS.amal.name],
+    ['assistant', 'SARA', USERS.sara.name],
+    ['reception', 'rana', USERS.rana.name],
+  ]) {
+    test(`${portal} signs in with a username (case-insensitive)`, async ({ page }) => {
+      await page.goto(`/login/${portal}`)
+      await page.getByLabel('Username or phone number').fill(username)
+      await page.getByLabel('Password').fill(PASSWORD)
+      await page.getByRole('button', { name: 'Sign in' }).click()
+      await expect(page).toHaveURL((url) => url.pathname === `/${portal}`)
+      await expect(page.getByText(name, { exact: false }).first()).toBeVisible()
+    })
+  }
+
+  test('wrong password with a username shows an error', async ({ page }) => {
+    await page.goto('/login/doctor')
+    await page.getByLabel('Username or phone number').fill('dr.amal')
+    await page.getByLabel('Password').fill('not-the-password')
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    await expect(page.getByRole('alert')).toHaveText('Invalid username, phone number or password.')
   })
 
   test('toggle password visibility shows and hides password text', async ({ page }) => {
@@ -41,16 +63,16 @@ test.describe('Authentication and role-aware routing', () => {
 
   test('wrong password shows an error', async ({ page }) => {
     await page.goto('/login/reception')
-    await page.getByLabel('Phone number').fill(USERS.rana.phone)
+    await page.getByLabel('Username or phone number').fill(USERS.rana.phone)
     await page.getByLabel('Password').fill('not-the-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
-    await expect(page.getByRole('alert')).toHaveText('Invalid phone number or password.')
+    await expect(page.getByRole('alert')).toHaveText('Invalid username, phone number or password.')
     await expect(page).toHaveURL(/\/login\/reception$/)
   })
 
   test('an account cannot sign in through another role portal', async ({ page }) => {
     await page.goto('/login/doctor')
-    await page.getByLabel('Phone number').fill(USERS.rana.phone)
+    await page.getByLabel('Username or phone number').fill(USERS.rana.phone)
     await page.getByLabel('Password').fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.getByRole('alert')).toContainText('Receptionist login page')
@@ -59,7 +81,7 @@ test.describe('Authentication and role-aware routing', () => {
 
   test('formatted phone numbers are accepted', async ({ page }) => {
     await page.goto('/login/doctor')
-    await page.getByLabel('Phone number').fill('0100 000-0001')
+    await page.getByLabel('Username or phone number').fill('0100 000-0001')
     await page.getByLabel('Password').fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/doctor')

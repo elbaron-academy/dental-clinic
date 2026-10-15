@@ -1,6 +1,8 @@
 """AUTH-001, AUTH-003: phone number + password login for every role."""
 
 import pytest
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from rest_framework.authtoken.models import Token
 
 from apps.accounts.models import Role
@@ -26,7 +28,7 @@ def test_wrong_password_is_rejected(api_client, doctor):
     response = api_client.post(LOGIN_URL, {"phone": doctor.phone, "password": "wrong"})
     assert response.status_code == 400
     assert response.json() == {
-        "detail": "Invalid phone number or password.",
+        "detail": "Invalid username, phone number or password.",
         "code": "invalid_credentials",
     }
 
@@ -47,19 +49,101 @@ def test_inactive_user_cannot_log_in(api_client, doctor):
     assert response.json()["code"] == "invalid_credentials"
 
 
-def test_username_field_is_not_accepted(api_client, doctor):
-    """AUTH-003: there is no username login."""
+def test_user_logs_in_with_username(api_client, clinic):
+    user = testing.make_user(Role.DOCTOR, clinic, username="Dr.Amal")
     response = api_client.post(
-        LOGIN_URL, {"username": doctor.phone, "password": testing.DEFAULT_PASSWORD}
+        LOGIN_URL, {"identifier": "dr.amal", "password": testing.DEFAULT_PASSWORD}
+    )
+    assert response.status_code == 200, response.content
+    assert response.json()["user"]["id"] == user.id
+
+
+def test_username_is_case_insensitive(api_client, clinic):
+    testing.make_user(Role.ASSISTANT, clinic, username="Sara_A")
+    response = api_client.post(
+        LOGIN_URL, {"identifier": " SARA_a ", "password": testing.DEFAULT_PASSWORD}
+    )
+    assert response.status_code == 200
+
+
+def test_identifier_accepts_phone(api_client, doctor):
+    response = api_client.post(
+        LOGIN_URL, {"identifier": doctor.phone, "password": testing.DEFAULT_PASSWORD}
+    )
+    assert response.status_code == 200
+
+
+def test_phone_key_still_accepts_a_username(api_client, clinic):
+    testing.make_user(Role.DOCTOR, clinic, username="amal")
+    response = api_client.post(
+        LOGIN_URL, {"phone": "amal", "password": testing.DEFAULT_PASSWORD}
+    )
+    assert response.status_code == 200
+
+
+def test_wrong_password_with_username_is_rejected(api_client, clinic):
+    testing.make_user(Role.DOCTOR, clinic, username="amal")
+    response = api_client.post(LOGIN_URL, {"identifier": "amal", "password": "wrong"})
+    assert response.status_code == 400
+    assert response.json()["code"] == "invalid_credentials"
+
+
+def test_unknown_username_is_rejected_with_same_message(api_client, db):
+    response = api_client.post(LOGIN_URL, {"identifier": "nobody", "password": "whatever"})
+    assert response.status_code == 400
+    assert response.json()["code"] == "invalid_credentials"
+
+
+def test_users_without_username_cannot_be_found_by_blank_identifier(api_client, doctor):
+    assert doctor.username is None
+    response = api_client.post(LOGIN_URL, {"identifier": "  ", "password": "x"})
+    assert response.status_code == 400
+    assert "identifier" in response.json()
+
+
+def test_inactive_user_cannot_log_in_with_username(api_client, clinic):
+    testing.make_user(Role.DOCTOR, clinic, username="amal", is_active=False)
+    response = api_client.post(
+        LOGIN_URL, {"identifier": "amal", "password": testing.DEFAULT_PASSWORD}
     )
     assert response.status_code == 400
-    assert "phone" in response.json()
+    assert response.json()["code"] == "invalid_credentials"
 
 
-def test_login_requires_both_fields(api_client, db):
-    response = api_client.post(LOGIN_URL, {})
+def test_role_mismatch_applies_to_username_login(api_client, clinic):
+    testing.make_user(Role.RECEPTIONIST, clinic, username="rana")
+    response = api_client.post(
+        LOGIN_URL,
+        {"identifier": "rana", "password": testing.DEFAULT_PASSWORD, "role": Role.DOCTOR},
+    )
+    assert response.json()["code"] == "role_mismatch"
+
+
+def test_username_is_unique_ignoring_case(clinic):
+    testing.make_user(Role.DOCTOR, clinic, username="amal")
+    with pytest.raises(IntegrityError):
+        testing.make_user(Role.ASSISTANT, clinic, username="AMAL")
+
+
+def test_blank_usernames_do_not_clash(clinic):
+    a = testing.make_user(Role.DOCTOR, clinic, username="")
+    b = testing.make_user(Role.ASSISTANT, clinic, username="")
+    assert a.username is None and b.username is None
+
+
+@pytest.mark.parametrize("bad", ["ab", "1amal", "a b", "amal@x", "x" * 33])
+def test_invalid_usernames_are_refused(clinic, bad):
+    user = testing.make_user(Role.DOCTOR, clinic)
+    user.username = bad
+    with pytest.raises(ValidationError):
+        user.full_clean()
+
+
+def test_login_requires_identifier_and_password(api_client, db):
+    assert set(api_client.post(LOGIN_URL, {}).json()) == {"password"}
+    response = api_client.post(LOGIN_URL, {"password": "x"})
     assert response.status_code == 400
-    assert set(response.json()) == {"phone", "password"}
+    assert set(response.json()) == {"identifier"}
 
 
 def test_role_mismatch_is_refused_without_token(api_client, receptionist):

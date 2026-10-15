@@ -24,12 +24,45 @@ def test_formatted_phone_is_accepted(smile, api_client_factory):
     assert response.status_code == 200
 
 
-def test_there_is_no_username_login(smile, api_client_factory):
+@pytest.mark.parametrize("username", ["dr.amal", "DR.Amal", " dr.amal "])
+def test_username_login(smile, api_client_factory, username):
+    smile.doctor_a.username = "dr.amal"
+    smile.doctor_a.save()
+    response = api_client_factory().post(
+        "/api/auth/login/", {"identifier": username, "password": PASSWORD}
+    )
+    assert response.status_code == 200
+    assert response.json()["user"]["id"] == smile.doctor_a.id
+
+
+def test_identifier_accepts_phone(smile, api_client_factory):
+    response = api_client_factory().post(
+        "/api/auth/login/", {"identifier": smile.doctor_a.phone, "password": PASSWORD}
+    )
+    assert response.status_code == 200
+
+
+def test_unknown_username_or_wrong_password_is_refused(smile, api_client_factory):
+    smile.doctor_a.username = "dr.amal"
+    smile.doctor_a.save()
     client = api_client_factory()
-    response = client.post(
-        "/api/auth/login/", {"username": smile.doctor_a.phone, "password": PASSWORD}
+    for body in [
+        {"identifier": "nobody", "password": PASSWORD},
+        {"identifier": "dr.amal", "password": "wrong"},
+    ]:
+        response = client.post("/api/auth/login/", body)
+        assert response.status_code == 400
+        assert response.json()["code"] == "invalid_credentials"
+
+
+def test_username_login_respects_portal_role(smile, api_client_factory):
+    smile.receptionist.username = "rana"
+    smile.receptionist.save()
+    response = api_client_factory().post(
+        "/api/auth/login/", {"identifier": "rana", "password": PASSWORD, "role": "DOCTOR"}
     )
     assert response.status_code == 400
+    assert response.json()["code"] == "role_mismatch"
 
 
 def test_there_is_no_foreign_password_flow(api_client_factory, db):

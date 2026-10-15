@@ -58,7 +58,16 @@ class MeSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField(max_length=32)
+    identifier = serializers.CharField(
+        max_length=64,
+        required=False,
+        help_text="Username or phone number.",
+    )
+    phone = serializers.CharField(
+        max_length=64,
+        required=False,
+        help_text="Alias of identifier, kept for older clients.",
+    )
     password = serializers.CharField(max_length=128, trim_whitespace=False, write_only=True)
     role = serializers.ChoiceField(
         choices=Role.choices,
@@ -67,11 +76,18 @@ class LoginSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
+        identifier = (attrs.get("identifier") or attrs.get("phone") or "").strip()
+        if not identifier:
+            raise serializers.ValidationError(
+                {"identifier": ["Enter your username or phone number."]}
+            )
         user = authenticate(
-            self.context.get("request"), phone=attrs["phone"], password=attrs["password"]
+            self.context.get("request"), identifier=identifier, password=attrs["password"]
         )
         if user is None:
-            raise LoginFailed("Invalid phone number or password.", code="invalid_credentials")
+            raise LoginFailed(
+                "Invalid username, phone number or password.", code="invalid_credentials"
+            )
         if not user.has_app_role or not user.clinic_id or not user.clinic.is_active:
             raise LoginFailed(
                 "This account is not linked to an active clinic.", code="no_clinic_access"

@@ -26,7 +26,7 @@ from the role name, because admins can grant extra permissions (AUTH-002).
 
 | Method | Path | Body / query | Response |
 |---|---|---|---|
-| POST | `/api/auth/login/` | `{phone, password, role?}` | `200 {token, user: Me}`. `400 {detail, code}` with code `invalid_credentials` \| `no_clinic_access` \| `role_mismatch`. `429` when throttled. |
+| POST | `/api/auth/login/` | `{identifier, password, role?}` (`identifier` = username or phone number; `phone` is accepted as an alias) | `200 {token, user: Me}`. `400 {detail, code}` with code `invalid_credentials` \| `no_clinic_access` \| `role_mismatch`. `429` when throttled. |
 | POST | `/api/auth/logout/` | — | `204` and the token is revoked |
 | GET | `/api/auth/me/` | — | `Me` |
 | GET | `/api/doctors/` | — | `[{id, full_name}]`, the user's permitted doctors. **If exactly one is returned, clients auto-select it** (CLINIC-002). |

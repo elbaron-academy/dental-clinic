@@ -28,7 +28,7 @@ export function uniquePhone(): string {
 /** Signs in through the role's own login page. */
 export async function loginAs(page: Page, user: DemoUser) {
   await page.goto(`/login/${user.portal}`)
-  await page.getByLabel('Phone number').fill(user.phone)
+  await page.getByLabel('Username or phone number').fill(user.phone)
   await page.getByLabel('Password').fill(PASSWORD)
   await page.getByRole('button', { name: 'Sign in' }).click()
   await expect(page).toHaveURL((url) => url.pathname === `/${user.portal}`)

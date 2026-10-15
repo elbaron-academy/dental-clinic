@@ -9,8 +9,8 @@ import { AppVersion } from '../components/AppVersion'
 
 /**
  * Role-specific login pages (S02-PWA-01..03): Doctor, Assistant and
- * Receptionist each have their own page. All use phone number + password
- * (AUTH-001); the API refuses accounts of another role (CR-003).
+ * Receptionist each have their own page. All use username or phone number +
+ * password (AUTH-001); the API refuses accounts of another role (CR-003).
  */
 export function LoginPage() {
   const { role: slug } = useParams()
@@ -18,7 +18,7 @@ export function LoginPage() {
   const { user, login, sessionExpired } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [phone, setPhone] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -35,7 +35,7 @@ export function LoginPage() {
     setPending(true)
     setError(null)
     try {
-      const me = await login(phone.trim(), password, info.role)
+      const me = await login(identifier.trim(), password, info.role)
       navigate(from && from !== '/' ? from : ROLES[me.role].home, { replace: true })
     } catch (err) {
       setError(err)
@@ -64,15 +64,22 @@ export function LoginPage() {
             {errorMessage(formError)}
           </div>
         ) : null}
-        <Field label="Phone number" htmlFor="phone" error={fieldError('phone')} required>
+        <Field
+          label="Username or phone number"
+          htmlFor="identifier"
+          error={fieldError('identifier')}
+          required
+        >
           <input
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="tel"
+            id="identifier"
+            name="identifier"
+            type="text"
             autoComplete="username"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            value={identifier}
+            onChange={(event) => setIdentifier(event.target.value)}
             required
             autoFocus
           />
@@ -131,7 +138,7 @@ export function LoginPage() {
             </button>
           </div>
         </Field>
-        <button type="submit" className="btn btn-primary btn-block" disabled={pending || !phone || !password}>
+        <button type="submit" className="btn btn-primary btn-block" disabled={pending || !identifier.trim() || !password}>
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
         <p className="auth-footer">

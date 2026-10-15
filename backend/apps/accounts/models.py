@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -11,6 +12,19 @@ class Role(models.TextChoices):
     DOCTOR = "DOCTOR", "Doctor"
     ASSISTANT = "ASSISTANT", "Assistant"
     RECEPTIONIST = "RECEPTIONIST", "Receptionist"
+
+
+validate_username = RegexValidator(
+    r"^[A-Za-z][A-Za-z0-9._-]{2,31}$",
+    "Use 3-32 letters, digits, dots, dashes or underscores, starting with a letter.",
+    code="invalid_username",
+)
+
+
+def normalize_username(value: str | None) -> str | None:
+    """Usernames are case-insensitive and stored lowercase. Blank means no username."""
+    value = (value or "").strip().lower()
+    return value or None
 
 
 class UserManager(BaseUserManager):
@@ -43,7 +57,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """Application user. Identified by phone number, never by username (AUTH-001/003)."""
+    """Application user. Signs in with phone number or optional username (AUTH-001/003)."""
 
     phone = models.CharField(
         "phone number",
@@ -52,6 +66,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         validators=[validate_phone],
         help_text="Used to log in. Spaces and dashes are removed automatically.",
         error_messages={"unique": "A user with this phone number already exists."},
+    )
+    username = models.CharField(
+        max_length=32,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[validate_username],
+        help_text="Optional. An alternative to the phone number when signing in. Not case-sensitive.",
+        error_messages={"unique": "A user with this username already exists."},
     )
     full_name = models.CharField(max_length=150)
     role = models.CharField(
@@ -106,11 +129,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def clean(self):
         super().clean()
         self.phone = normalize_phone(self.phone)
+        self.username = normalize_username(self.username)
         if self.role and not self.clinic_id:
             raise ValidationError({"clinic": "Clinic staff must belong to a clinic."})
 
     def save(self, *args, **kwargs):
         self.phone = normalize_phone(self.phone)
+        self.username = normalize_username(self.username)
         super().save(*args, **kwargs)
 
     def get_full_name(self) -> str:

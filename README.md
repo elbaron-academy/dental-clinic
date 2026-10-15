@@ -57,7 +57,7 @@ because it creates accounts with a known password.
 
 ## Setting up a real clinic
 
-1. `python manage.py createsuperuser`: you are asked for a phone number, not a username.
+1. `python manage.py createsuperuser`: you are asked for a phone number (the optional username is set afterwards in Django Admin).
 2. In **Django Admin** (`/admin/`):
    * **Clinics** → add the clinic.
    * **Users** → add the doctors (role *Doctor*), then assistants and
