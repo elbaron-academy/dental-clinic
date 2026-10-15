@@ -2160,6 +2160,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/VisitStatusEnum'
           readOnly: true
+          default: ACTIVE
         status_display:
           type: string
           readOnly: true
