@@ -48,9 +48,9 @@ export function EmptyState({ children }: { children: ReactNode }) {
   return <p className="empty-state">{children}</p>
 }
 
-export function Card({ title, actions, children, className = '' }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string }) {
+export function Card({ title, actions, children, className = '', 'data-tour': dataTour }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string; 'data-tour'?: string }) {
   return (
-    <section className={`card ${className}`}>
+    <section className={`card ${className}`} data-tour={dataTour}>
       {(title || actions) && (
         <div className="card-header">
           {title && <h2>{title}</h2>}
