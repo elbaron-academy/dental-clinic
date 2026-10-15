@@ -1627,10 +1627,16 @@ components:
     LoginRequest:
       type: object
       properties:
+        identifier:
+          type: string
+          minLength: 1
+          description: Username or phone number.
+          maxLength: 64
         phone:
           type: string
           minLength: 1
-          maxLength: 32
+          description: Alias of identifier, kept for older clients.
+          maxLength: 64
         password:
           type: string
           writeOnly: true
@@ -1647,7 +1653,6 @@ components:
             * `RECEPTIONIST` - Receptionist
       required:
       - password
-      - phone
     LoginResponse:
       type: object
       properties:
