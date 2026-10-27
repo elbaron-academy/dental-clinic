@@ -9,7 +9,7 @@ Replace `clinic.example.com` with your domain everywhere.
 
 | | |
 |---|---|
-| VM | `dental-clinic`, GCP `hossam-project-503909`, `us-central1-a`, e2-medium, `34.123.215.195`. Connect with `ssh dental` |
+| VM | `dental-clinic`, GCP `hossam-project-503909`, `us-central1-a`, e2-medium, `35.226.179.10`. Connect with `ssh dental` |
 | PWA | https://dental.hossam-ameen.online, built with `--api-url https://api.dental.hossam-ameen.online` |
 | API / admin | https://api.dental.hossam-ameen.online. CORS allows the PWA origin |
 | Database | SQLite at `/srv/dental-clinic/backend/shared/db.sqlite3` (for now) |
@@ -80,15 +80,15 @@ Server layout:
 - [ ] Reserve the VM's IP as static, so it survives stop/start:
   ```bash
   gcloud compute addresses create dental-clinic-ip --project=hossam-project-503909 \
-    --region=us-central1 --addresses=34.123.215.195
+    --region=us-central1 --addresses=35.226.179.10
   ```
-- [ ] At your DNS provider, add an `A` record: `clinic.example.com → 34.123.215.195`.
+- [ ] At your DNS provider, add an `A` record: `clinic.example.com → 35.226.179.10`.
   Check it with `dig +short clinic.example.com`.
 - [ ] Optional: restrict SSH (port 22) to your own IP in the `allow-ssh` firewall rule.
 
 ## 2. Server packages
 
-SSH in with `ssh -i ~/.ssh/id_ed25519 hossam@34.123.215.195`, then:
+SSH in with `ssh -i ~/.ssh/id_ed25519 hossam@35.226.179.10`, then:
 
 - [ ] Update the system:
   ```bash
@@ -180,7 +180,7 @@ A deploy key gives this one VM read access to this one repo, without your person
 ## 9. Routine deploys
 
 ```bash
-ssh hossam@34.123.215.195
+ssh hossam@35.226.179.10
 cd /srv/dental-clinic/repo && git pull --ff-only
 sudo backend/deploy/deploy.sh --domain clinic.example.com   # backend first (migrations)
 sudo web/deploy/deploy.sh --domain clinic.example.com

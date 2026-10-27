@@ -1,0 +1,28 @@
+# Server + app settings for deploy.py (copy to config.yml, which is git-ignored).
+# Combines the generic SSH deploy tool with backend/deploy and web/deploy of this repo.
+production:
+  ip: 35.226.179.10
+  username: hossam
+  ssh_file: ~/.ssh/google_compute_engine
+  ssl: true                          # Let's Encrypt via certbot (domains must point to ip)
+  ssl_email: mahmoudmoaz55@gmail.com
+
+  repo:
+    git_url: https://github.com/elbaron-academy/dental-clinic.git   # public repo, HTTPS clone
+    branch: claude/adoring-goldberg-ye6g4m
+    checkout: /srv/dental-clinic/repo   # clone on the server; the repo's own deploy scripts run from here
+    install_root: /srv/dental-clinic    # releases, shared/.env and the sqlite db live under here
+    name: dental-clinic                 # system user, systemd service and nginx file prefix
+
+  frontend:                             # web/ (React PWA), built on the server by web/deploy/deploy.sh
+    domain: dental.hossam-ameen.online
+    node_major: 22
+
+  backend:                              # backend/ (Django + gunicorn under systemd)
+    domain: api.dental.hossam-ameen.online
+    port: 8000
+    workers: 2
+    root_redirect: /admin/              # "/" of the API domain redirects here
+    health_path: /api/health/
+    # empty = SQLite in <install_root>/backend/shared/db.sqlite3; or postgres://user:pass@127.0.0.1:5432/db
+    database_url: ""

@@ -1,13 +1,13 @@
 DENTAL CLINIC - PRODUCTION DEPLOYMENT DETAILS
 =============================================
-Last updated: 2026-09-26
+Last updated: 2026-10-27 (moved to a new VM, Debian 12, provisioned by deploy/deploy.py)
 
 SERVER
 ------
 GCP project      : hossam-project-503909
 VM name / zone   : dental-clinic / us-central1-a (e2-medium: 2 vCPU, 4 GB, Ubuntu 24.04)
-External IP      : 34.123.215.195 (static: address "dental-clinic-ip", us-central1)
-SSH              : ssh dental            (alias in ~/.ssh/config -> hossam@34.123.215.195)
+External IP      : 35.226.179.10 (static: address "dental-clinic-ip", us-central1)
+SSH              : ssh dental            (alias in ~/.ssh/config -> hossam@35.226.179.10)
 Git checkout     : /srv/dental-clinic/repo   (branch claude/adoring-goldberg-ye6g4m, HTTPS clone)
 System user      : dental-clinic         (runs the backend, builds the frontend; no login)
 
@@ -78,7 +78,7 @@ Forced command   : /usr/local/sbin/dental-ci-deploy  (copy of scripts/ci-deploy-
 sudoers          : /etc/sudoers.d/dental-ci-deploy
 Key restriction  : /home/deploy/.ssh/authorized_keys  (command="sudo /usr/local/sbin/dental-ci-deploy",restrict)
 Private key      : ~/.ssh/dental_github_actions on Hossam's laptop -> repo secret DEPLOY_SSH_KEY
-Client sends     : ssh deploy@34.123.215.195 "deploy <40-char sha on the deploy branch>"
+Client sends     : ssh deploy@35.226.179.10 "deploy <40-char sha on the deploy branch>"
 Repo secrets     : DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS (added 2026-09-27)
 CI job           : "Deploy to production" in .github/workflows/ci.yml, after backend + web pass,
                    only for pushes to claude/adoring-goldberg-ye6g4m; one deploy at a time
